@@ -1,0 +1,12 @@
+[Unit]
+Description=gunicorn daemon
+After=network.target
+
+[Service]
+User=dev
+Group=dev
+WorkingDirectory=/home/dev/akh_project
+ExecStart=/home/dev/akh_project/djangoen/bin/gunicorn --workers 3 --bind unix:/home/dev/akh_project/akh_project.sock akh_project.wsgi:application
+
+[Install]
+WantedBy=multi-user.target

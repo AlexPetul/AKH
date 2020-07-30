@@ -1,0 +1,96 @@
+{% extends 'home/home_page.html' %}
+{% load static %}
+
+{% block title %}{{ page.title }}{% endblock title %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/index.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/dadata.css' %}"/>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v1.8.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v1.8.0/mapbox-gl.css' rel='stylesheet'/>
+
+{% endblock extra_css %}
+
+
+{% block content %}
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.min.js"></script>
+    <link
+            rel="stylesheet"
+            href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.css"
+            type="text/css"
+    />
+    <!-- Promise polyfill script required to use Mapbox GL Geocoder in IE 11 -->
+
+    <div id="root"></div>
+
+    <style type="text/css">
+        .mapboxgl-marker-anchor-center svg {
+            display: none;
+        }
+
+        .marker {
+            background-image: url('/../../../../static/img/original_images/location-marker.png');
+            background-size: cover;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+
+    <script>
+        var apiPath = "{{ api_path }}";
+        var menus = {{ menus|safe }};
+        var languageId = {{ language_id }};
+        var pageHeader = "";
+        var pageSubHeader = "";
+        var listTab = "";
+        var mapTab = "";
+        var addTerminalButton = "";
+        var tableNumber = "";
+        var tableAddress = "";
+        var tableToken = "";
+        var tableTokenExpires = "";
+        var tableStatus = "";
+        var tableDateTime = "";
+        var tableCellsCount = "";
+        if (languageId === 2) {
+            pageHeader = "{{ page.page_header_en }}";
+            pageSubHeader = "{{ page.page_subheader_en }}";
+            listTab = "{{ page.list_tab_en }}";
+            mapTab = "{{ page.map_tab_en }}";
+            addTerminalButton = "{{ page.add_terminal_button_en }}";
+            tableNumber = "{{ page.table_number_en }}";
+            tableAddress = "{{ page.table_address_en }}";
+            tableToken = "{{ page.table_key_en }}";
+            tableTokenExpires = "{{ page.table_key_expires_en }}";
+            tableStatus = "{{ page.table_status_en }}";
+            tableDateTime = "{{ page.table_datetime_en }}";
+            tableCellsCount = "{{ page.table_cells_count_en }}";
+        } else {
+            pageHeader = "{{ page.page_header }}";
+            pageSubHeader = "{{ page.page_subheader }}";
+            listTab = "{{ page.list_tab }}";
+            mapTab = "{{ page.map_tab }}";
+            addTerminalButton = "{{ page.add_terminal_button }}";
+            tableNumber = "{{ page.table_number }}";
+            tableAddress = "{{ page.table_address }}";
+            tableToken = "{{ page.table_key }}";
+            tableTokenExpires = "{{ page.table_key_expires }}";
+            tableStatus = "{{ page.table_status }}";
+            tableDateTime = "{{ page.table_datetime }}";
+            tableCellsCount = "{{ page.table_cells_count }}";
+        }
+
+        var apiLinks = {{ api_links|safe }};
+        var statusColors = {{ status_colors|safe }};
+        var terminalsPerPage = {{ page.terminals_per_page }};
+        var messageTypes = {{ message_types|safe}};
+        var portal_token = "{{ portal_token }}";
+        var itemsPerPage = {{ page.cells_per_page }};
+    </script>
+
+    <script src="{% static 'js/main.js' %}"></script>
+
+{% endblock content %}

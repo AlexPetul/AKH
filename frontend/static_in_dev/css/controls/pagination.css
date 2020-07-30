@@ -1,0 +1,57 @@
+/* ==========================================================================
+     PAGINATION
+     ========================================================================== */
+  .pagination {
+    text-align: right;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 17px;
+    color: #676C79;
+    margin-left: -6px;
+    margin-top: 49px;
+  }
+
+  .pagination a {
+    color: #676C79;
+    text-decoration: none;
+  }
+
+  .pagination a {
+    margin-left: 6px;
+  }
+
+  .pagination a:hover {
+    color: #4F78E0;
+  }
+
+  .pagination b {
+    font-weight: 600;
+    color: #4F78E0;
+    margin-left: 6px;
+  }
+
+  a.pagination__prev {
+    display: inline-block;
+    line-height: 14px;
+    border-bottom: 1px solid rgb(103, 108, 121, 0.4);
+    margin-right: 35px;
+  }
+
+  a.pagination__prev:hover {
+    border-color: transparent;
+    color: #4F78E0;
+  }
+
+  a.pagination__next {
+    display: inline-block;
+    line-height: 14px;
+    border-bottom: 1px solid rgb(103, 108, 121, 0.4);
+    margin-left: 35px;
+  }
+
+  a.pagination__next:hover {
+    color: #4F78E0;
+    border-color: transparent;
+  }
+

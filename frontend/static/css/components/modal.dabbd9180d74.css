@@ -1,0 +1,135 @@
+ /* ==========================================================================
+     MODAL
+     ========================================================================== */
+  .modal {
+    background: rgba(0, 0, 0, 0.5);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    display: none;
+    overflow-y: auto;
+  }
+
+  .modal.active {
+    display: block;
+  }
+
+  .modal__container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 30px;
+    min-height: 100%;
+  }
+
+  .modal__block {
+    max-width: 426px;
+    background: #fff;
+    border-radius: 7px;
+    padding: 47px 55px;
+    position: relative;
+  }
+
+  .modal__caption {
+    margin-bottom: 30px;
+  }
+
+  .modal__title {
+    font-style: normal;
+    font-weight: bold;
+    font-size: 23px;
+    line-height: 28px;
+    color: #000000;
+    margin-bottom: 16px;
+  }
+
+  .modal__sub-title {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 22px;
+    color: #000000;
+    margin-top: 16px;
+  }
+
+  .modal__exit {
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 44px;
+    height: 44px;
+    line-height: 44px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    text-decoration: none;
+    text-align: center;
+    opacity: 0.65;
+    padding: 0 0 18px 10px;
+    color: #000;
+    font-style: normal;
+    font-size: 28px;
+    font-family: Arial, Baskerville, monospace;
+  }
+
+  .modal__exit:before {
+    content: '×';
+  }
+
+  .modal__exit:hover {
+    opacity: 1;
+  }
+
+  .modal .form__input + .form__input {
+    margin-top: 25px;
+  }
+
+  .cansel {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 19px;
+    color: #3D3D3D;
+    margin-left: 25px;
+  }
+
+  .cansel a {
+    line-height: 16px;
+    color: #3D3D3D;
+    text-decoration: none;
+    display: inline-block;
+    border-bottom: 1px solid rgb(61, 61, 61, 0.5);
+  }
+
+  .cansel a:hover {
+    border-color: transparent;
+  }
+
+  .modal .form__submit {
+    justify-content: flex-start;
+  }
+
+  .modal__info {
+    margin-bottom: 36px;
+  }
+
+  .modal__name {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 22px;
+    color: #000;
+  }
+
+  .modal__label {
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 17px;
+    color: #000;
+  }

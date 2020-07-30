@@ -1,0 +1,34 @@
+.form__link {
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 17px;
+    color: #000;
+    margin-top: 30px;
+  }
+
+  .form__link a {
+    color: #4F78E0;
+    transition: all 0.2s ease;
+  }
+
+  .form__link a:hover {
+    color: #6992f9;
+  }
+
+  .back {
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 17px;
+    color: #828BA3;
+  }
+
+  .back a {
+    color: #828BA3;
+    transition: all 0.2s ease;
+  }
+
+  .back a:hover {
+    color: #6992f9;
+  }

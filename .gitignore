@@ -1,0 +1,5 @@
+/frontend/node_modules/
+/.idea/
+/frontend/static_in_dev/js/
+/home/migrations/
+/akh_app/migrations/

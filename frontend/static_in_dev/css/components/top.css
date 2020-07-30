@@ -1,0 +1,42 @@
+/* ==========================================================================
+     TOP
+     ========================================================================== */
+  .top {
+    display: flex;
+    align-items: center;
+    margin-bottom: 40px;
+  }
+
+  .top .caption {
+    margin-bottom: 0;
+  }
+
+  .description {
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 17px;
+    color: #9195A0;
+  }
+
+  .top .caption + .description {
+    margin-top: -2px;
+  }
+
+  .top__left {
+    margin-right: 30px;
+  }
+
+  .top__right {
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .top .button {
+    min-width: 152px;
+  }
+
+  .filter {
+    max-width: 214px;
+    margin-bottom: 34px;
+  }

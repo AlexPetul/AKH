@@ -1,0 +1,34 @@
+{% extends 'home/home_page.html' %}
+{% load static %}
+
+{% block title %}{{ page.title }}{% endblock title %}
+
+{% block content %}
+
+    <div id="root"></div>
+
+    <script>
+        var apiPath = "{{ api_path }}";
+        var menus = {{ menus|safe }};
+        var page_header = "";
+        var apiLinks = {{ api_links|safe }};
+        var languageId = {{ language_id }};
+        var buttonChooseText = "";
+        if (languageId === 2) {
+            page_header = "{{ page.page_header_en }}";
+            buttonChooseText = "{{ page.button_choose_text_en }}";
+        } else {
+            page_header = "{{ page.page_header }}";
+            buttonChooseText = "{{ page.button_choose_text }}";
+        }
+
+        var akhIcon = "{{ page.akh_icon }}";
+        var eSafeIcon = "{{ page.e_safe_icon }}";
+        var conciergeIcon = "{{ page.concierge_icon }}";
+        var portal_token = "{{ portal_token }}";
+        var configIcons = {{ config_icons|safe }};
+
+    </script>
+    <script src="{% static 'js/main.js' %}"></script>
+
+{% endblock content %}

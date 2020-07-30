@@ -1,0 +1,22 @@
+/* ==========================================================================
+     FORM
+     ========================================================================== */
+  .signin {
+    margin-left: 50px;
+  }
+
+  .form {
+    max-width: 320px;
+  }
+
+  .form + .form {
+    padding-top: 33px;
+    margin-top: 47px;
+    border-top: 1px solid #ECF1FB;
+  }
+
+  .form_mini {
+    max-width: 270px;
+  }
+
+

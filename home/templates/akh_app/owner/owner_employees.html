@@ -1,0 +1,48 @@
+{% extends 'home/home_page.html' %}
+{% load static %}
+
+{% block title %}{{ page.title }}{% endblock title %}
+
+{% block content %}
+
+    <div id="root"></div>
+
+    <script>
+        var menus = {{ menus|safe }};
+        var apiPath = "{{ api_path }}";
+        var languageId = {{ language_id }};
+        var pageHeader = "";
+        var pageSubHeader = "";
+        var addEmployeeButton = "";
+        var tableSurname = "";
+        var tableName = "";
+        var tablePatronymic = "";
+        var tablePhone = "";
+        var tableStatus = "";
+        if (languageId === 2) {
+            pageHeader = "{{ page.page_header_en }}";
+            pageSubHeader = "{{ page.page_subheader_en }}";
+            addEmployeeButton = "{{ page.add_button_name_en }}";
+            tableSurname = "{{ page.table_surname_en }}";
+            tableName = "{{ page.table_name_en }}";
+            tablePatronymic = "{{ page.table_patronymic_en }}";
+            tablePhone = "{{ page.table_phone_en }}";
+            tableStatus = "{{ page.table_status_en }}";
+        } else {
+            pageHeader = "{{ page.page_header }}";
+            pageSubHeader = "{{ page.page_subheader }}";
+            addEmployeeButton = "{{ page.add_button_name }}";
+            tableSurname = "{{ page.table_surname }}";
+            tableName = "{{ page.table_name }}";
+            tablePatronymic = "{{ page.table_patronymic }}";
+            tablePhone = "{{ page.table_phone }}";
+            tableStatus = "{{ page.table_status }}";
+        }
+        var employeesPerPage = {{ page.employees_per_page }}
+        var apiLinks = {{ api_links|safe }};
+        var portal_token = "{{ portal_token }}"
+    </script>
+
+    <script src="{% static 'js/main.js' %}"></script>
+
+{% endblock content %}

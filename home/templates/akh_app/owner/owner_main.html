@@ -1,0 +1,66 @@
+{% extends 'home/home_page.html' %}
+{% load static %}
+
+{% block title %}{{ page.title }}{% endblock title %}
+
+{% block content %}
+
+    <div id="root"></div>
+
+    <script>
+        var menus = {{ menus|safe }};
+        var apiPath = "{{ api_path }}";
+        var authMenus = {{ auth_menus|safe }};
+
+        var languageId = {{ language_id }};
+        var pageHeader = "";
+        var statTab = "";
+        var messagesTab = "";
+        var totalTerminalsText = "";
+        var onlineTerminalsText = "";
+        var expiredTerminalsText = "";
+        var pendingTerminalsText = "";
+        var blockedTerminalsText = "";
+        var activeTerminalsText = "";
+        var changeConfigButton = "";
+        if (languageId === 2) {
+            pageHeader = "{{ page.page_header_en }}";
+            statTab = "{{ page.stat_tab_en }}";
+            messagesTab = "{{ page.messages_tab_en }}";
+            totalTerminalsText = "{{ page.total_terminals_text_en }}";
+            onlineTerminalsText = "{{ page.online_terminals_text_en }}";
+            expiredTerminalsText = "{{ page.expired_terminals_text_en }}";
+            pendingTerminalsText = "{{ page.pending_terminals_text_en }}";
+            blockedTerminalsText = "{{ page.blocked_terminals_text_en }}";
+            activeTerminalsText = "{{ page.active_terminals_text_en }}";
+            displayText = "{{ page.display_text_en }}";
+            changeConfigButton = "{{ page.change_config_button_en }}";
+        } else {
+            pageHeader = "{{ page.page_header }}";
+            statTab = "{{ page.stat_tab }}";
+            messagesTab = "{{ page.messages_tab }}";
+            totalTerminalsText = "{{ page.total_terminals_text }}";
+            onlineTerminalsText = "{{ page.online_terminals_text }}";
+            expiredTerminalsText = "{{ page.expired_terminals_text }}";
+            pendingTerminalsText = "{{ page.pending_terminals_text }}";
+            blockedTerminalsText = "{{ page.blocked_terminals_text }}";
+            activeTerminalsText = "{{ page.active_terminals_text }}";
+            displayText = "{{ page.display_text }}";
+            changeConfigButton = "{{ page.change_config_button }}";
+        }
+
+        var totalTerminalsIcon = "{{ page.total_terminals_icon }}";
+        var onlineTerminalsIcon = "{{ page.online_terminals_icon }}";
+        var expiredTerminalsIcon = "{{ page.expired_terminals_icon }}";
+        var pendingTerminalsIcon = "{{ page.pending_terminals_icon }}";
+        var blockedTerminalsIcon = "{{ page.blocked_terminals_icon }}";
+        var activeTerminalsIcon = "{{ page.active_terminals_icon }}";
+
+
+        var messageTypes = {{ message_types|safe}};
+        var portal_token = "{{ portal_token }}"
+    </script>
+
+    <script src="{% static 'js/main.js' %}"></script>
+
+{% endblock content %}

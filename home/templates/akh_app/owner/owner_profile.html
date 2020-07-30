@@ -1,0 +1,52 @@
+{% extends 'home/home_page.html' %}
+{% load static %}
+
+{% block title %}{{ page.title }}{% endblock title %}
+
+{% block content %}
+
+    <div id="root"></div>
+
+    <script>
+        var menus = {{ menus|safe }};
+        var apiPath = "{{ api_path }}";
+        var languageId = {{ language_id }};
+        var pageHeader = "";
+        var changePassHeader = "";
+        var saveProfileButton = "";
+        var changePasswordButton = "";
+        var labelName = "";
+        var labelSurname = "";
+        var labelPatronymic = "";
+        var labelPhone = "";
+        var labelPassword = "";
+        var labelPasswordRepeat = "";
+        if (languageId === 2) {
+            pageHeader = "{{ page.page_header_en }}";
+            changePassHeader = "{{ page.change_password_header_en }}";
+            saveProfileButton = "{{ page.save_profile_button_en }}";
+            changePasswordButton = "{{ page.change_password_button_en }}";
+            labelName = "{{ page.label_name_en }}";
+            labelSurname = "{{ page.label_surname_en }}";
+            labelPatronymic = "{{ page.label_patronymic_en }}";
+            labelPhone = "{{ page.label_phone_en }}";
+            labelPassword = "{{ page.label_password_en }}";
+            labelPasswordRepeat = "{{ page.label_password_repeat_en }}";
+        } else {
+            pageHeader = "{{ page.page_header }}";
+            changePassHeader = "{{ page.change_password_header }}";
+            saveProfileButton = "{{ page.save_profile_button }}";
+            changePasswordButton = "{{ page.change_password_button }}";
+            labelName = "{{ page.label_name }}";
+            labelSurname = "{{ page.label_surname }}";
+            labelPatronymic = "{{ page.label_patronymic }}";
+            labelPhone = "{{ page.label_phone }}";
+            labelPassword = "{{ page.label_password }}";
+            labelPasswordRepeat = "{{ page.label_password_repeat }}";
+        }
+        var portal_token = "{{ portal_token }}"
+    </script>
+
+    <script src="{% static 'js/main.js' %}"></script>
+
+{% endblock content %}

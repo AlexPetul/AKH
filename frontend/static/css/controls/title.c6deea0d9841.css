@@ -1,0 +1,29 @@
+  .title {
+    font-style: normal;
+    font-weight: bold;
+    font-size: 32px;
+    line-height: 39px;
+    color: #4C5772;
+    margin-bottom: 43px;
+  }
+
+  .title_margin {
+    margin-bottom: 7px;
+  }
+
+  .caption {
+    font-style: normal;
+    font-weight: bold;
+    font-size: 24px;
+    line-height: 29px;
+    color: #000;
+    margin-bottom: 39px;
+    margin-top: 3px;
+  }
+
+  .content_myprofile .caption_change-password {
+    padding-top: 33px;
+    margin-top: 47px;
+    border-top: 1px solid #ECF1FB;
+    max-width: 320px;
+  }
