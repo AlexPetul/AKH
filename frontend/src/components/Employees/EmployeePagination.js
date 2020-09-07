@@ -64,9 +64,10 @@ class EmployeePagination extends Component {
             <div className="pagination">
                 <a href=""
                    onClick={this.prevPage}
-                   className="pagination__prev">Назад</a>
+                   className="pagination__prev">{window.languageId === 1 ? "Назад" : "Prev"}</a>
                 {Array.from(Array(this.props.countPages)).map((page, page_i) =>
                     <a href=""
+                       key={page_i}
                        className={`pagination-page ${page_i ? "" : "active-page"}`}
                        id={"page-number-" + page_i}
                        onClick={this.changePage}
@@ -74,7 +75,7 @@ class EmployeePagination extends Component {
                 )}
                 <a href=""
                    onClick={this.nextPage}
-                   className="pagination__next">Вперед</a>
+                   className="pagination__next">{window.languageId === 1 ? "Вперед" : "Next"}</a>
             </div>
         )
     }

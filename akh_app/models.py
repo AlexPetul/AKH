@@ -1,13 +1,13 @@
+from django import forms
 from django.db import models
 from django.contrib.auth.models import User
 
 from wagtail.snippets.models import register_snippet
-from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel, StreamFieldPanel, FieldRowPanel
+from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel, StreamFieldPanel, FieldRowPanel, PageChooserPanel
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.contrib.routable_page.models import Page
 from wagtail.core.models import Page
 from wagtail.core.fields import RichTextField, StreamField
-
 
 from .blocks import *
 
@@ -42,6 +42,30 @@ class EmailSettings(models.Model):
     class Meta:
         verbose_name_plural = 'Настройки почтового сервера'
         verbose_name = 'Настройки почтового сервера'
+
+
+@register_snippet
+class LanguageIcons(models.Model):
+    language_id = models.PositiveSmallIntegerField(null=True, verbose_name='ID языка')
+    language_icon = models.ForeignKey(
+        'wagtailimages.Image',
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name='Иконка',
+        related_name='+'
+    )
+
+    panels = [
+        FieldPanel('language_id'),
+        ImageChooserPanel('language_icon')
+    ]
+
+    def __str__(self):
+        return str(self.language_id)
+
+    class Meta:
+        verbose_name_plural = 'Иконки для языков'
+        verbose_name = 'Иконки для языков'
 
 
 @register_snippet
@@ -124,18 +148,147 @@ class TerminalMessagesType(models.Model):
 
 
 @register_snippet
-class LeftMenu(models.Model):
-    menu_icon = models.ImageField(verbose_name='Иконка', null=True)
-    menu_label = models.CharField(max_length=20, verbose_name='Название', null=True)
-    # related_page = models.ForeignKey('Page', on_delete=models.SET_NULL, null=True, blank=True)
-    is_visible = models.BooleanField(default=True, verbose_name='Отображать в меню', null=True)
+class Configuration(models.Model):
+    config_id = models.PositiveSmallIntegerField(null=True, verbose_name='ID')
+    config_name = models.CharField(max_length=30, null=True, verbose_name='Название')
+
+    def __str__(self):
+        return self.config_name
+
+    class Meta:
+        verbose_name_plural = 'Список конфигураций'
+        verbose_name = 'Список конфигураций'
+
+
+@register_snippet
+class OwnerMenu(models.Model):
+    menu_label = models.CharField(max_length=20, verbose_name='Название (ru)', null=True)
+    menu_label_en = models.CharField(max_length=20, verbose_name='Название (en)', null=True)
+    icon = models.ForeignKey(
+        'wagtailimages.Image',
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name='Иконка',
+        related_name='+'
+    )
+    icon_hover = models.ForeignKey(
+        'wagtailimages.Image',
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name='Иконка при наведении',
+        related_name='+'
+    )
+    related_page = models.ForeignKey('wagtailcore.Page', null=True, on_delete=models.CASCADE, related_name='+')
+    redirect_path = models.CharField(max_length=100, null=True, blank=True)
+    priority = models.PositiveIntegerField(null=True, blank=False, verbose_name='Порядковый номер')
+    configuration = models.ManyToManyField(Configuration)
 
     def __str__(self):
         return self.menu_label
 
+    panels = [
+        MultiFieldPanel([
+            FieldRowPanel([
+                FieldPanel('menu_label'),
+                FieldPanel('menu_label_en')
+            ]),
+        ], heading='Название'),
+        ImageChooserPanel('icon'),
+        ImageChooserPanel('icon_hover'),
+        PageChooserPanel('related_page'),
+        FieldPanel('priority'),
+        FieldPanel('configuration', widget=forms.CheckboxSelectMultiple)
+    ]
+
     class Meta:
-        verbose_name_plural = 'Боковое меню'
-        verbose_name = 'Боковое меню'
+        verbose_name_plural = 'Боковое меню владельца терминалов'
+        verbose_name = 'Боковое меню владельца терминалов'
+
+
+@register_snippet
+class AuthMenu(models.Model):
+    menu_label = models.CharField(max_length=20, verbose_name='Название (ru)', null=True)
+    menu_label_en = models.CharField(max_length=20, verbose_name='Название (en)', null=True)
+    icon = models.ForeignKey(
+        'wagtailimages.Image',
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name='Иконка',
+        related_name='+'
+    )
+    icon_hover = models.ForeignKey(
+        'wagtailimages.Image',
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name='Иконка при наведении',
+        related_name='+'
+    )
+    related_page = models.ForeignKey('wagtailcore.Page', null=True, on_delete=models.CASCADE, related_name='+')
+    redirect_path = models.CharField(max_length=100, null=True, blank=True)
+    priority = models.PositiveIntegerField(null=True, blank=False, verbose_name='Порядковый номер')
+
+    def __str__(self):
+        return self.menu_label
+
+    panels = [
+        MultiFieldPanel([
+            FieldRowPanel([
+                FieldPanel('menu_label'),
+                FieldPanel('menu_label_en')
+            ]),
+        ], heading='Название'),
+        ImageChooserPanel('icon'),
+        ImageChooserPanel('icon_hover'),
+        PageChooserPanel('related_page'),
+        FieldPanel('priority')
+    ]
+
+    class Meta:
+        verbose_name_plural = 'Боковое меню авторизации'
+        verbose_name = 'Боковое меню авторизации'
+
+
+@register_snippet
+class AdminMenu(models.Model):
+    menu_label = models.CharField(max_length=20, verbose_name='Название (ru)', null=True)
+    menu_label_en = models.CharField(max_length=20, verbose_name='Название (en)', null=True)
+    icon = models.ForeignKey(
+        'wagtailimages.Image',
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name='Иконка',
+        related_name='+'
+    )
+    icon_hover = models.ForeignKey(
+        'wagtailimages.Image',
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name='Иконка при наведении',
+        related_name='+'
+    )
+    related_page = models.ForeignKey('wagtailcore.Page', null=True, on_delete=models.CASCADE, related_name='+')
+    redirect_path = models.CharField(max_length=100, null=True, blank=True)
+    priority = models.PositiveIntegerField(null=True, blank=False, verbose_name='Порядковый номер')
+
+    def __str__(self):
+        return self.menu_label
+
+    panels = [
+        MultiFieldPanel([
+            FieldRowPanel([
+                FieldPanel('menu_label'),
+                FieldPanel('menu_label_en')
+            ]),
+        ], heading='Название'),
+        ImageChooserPanel('icon'),
+        ImageChooserPanel('icon_hover'),
+        PageChooserPanel('related_page'),
+        FieldPanel('priority')
+    ]
+
+    class Meta:
+        verbose_name_plural = 'Боковое меню администратора'
+        verbose_name = 'Боковое меню администратора'
 
 
 class CommonRoutes:
@@ -145,112 +298,1363 @@ class CommonRoutes:
 class LoginPage(Page):
     max_count = 1
 
-    page_header = models.CharField(
-        max_length=100,
-        verbose_name='Заголовок страницы',
-        null=True,
-        help_text='Данный заголовок будет отображаться сверху на вкладке страницы.'
-    )
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
+
+    password_field = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пароль')
+
+    email_field = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Email')
+
+    forgot_password = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Забыли пароль')
+
+    sign_in = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Кнопка войти')
+
+    invalid_email = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный email')
+
+    invalid_password = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный пароль')
+
+    modal_user_blocked = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пользователь заблокирован')
+
+    modal_user_not_exists = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пользователь не существует')
+
+    modal_confirm_email = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Подтвердить email')
+
+    modal_send_again = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отправить повторно')
+
+    modal_mail_sent = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Письмо отправлено')
+
     api_links = StreamField([
         ('api_block', ApiBlock())
     ], null=True)
 
     content_panels = Page.content_panels + [
-        FieldPanel('page_header'),
-        StreamFieldPanel('api_links'),
-    ]
+        MultiFieldPanel([
+            StreamFieldPanel('page_header')
+        ], heading='Заголовок'),
+        MultiFieldPanel([
+            StreamFieldPanel('password_field'),
+            StreamFieldPanel('email_field')
+        ], heading='Надписи над полями'),
+        MultiFieldPanel([
+            StreamFieldPanel('forgot_password')
+        ], heading='Ссылка "забыли пароль"'),
+        MultiFieldPanel([
+            StreamFieldPanel('sign_in')
+        ], heading='Кнопка входа'),
+        MultiFieldPanel([
+            StreamFieldPanel('invalid_email'),
+            StreamFieldPanel('invalid_password')
+        ], heading='Сообщения ошибок валидации'),
+        MultiFieldPanel([
+            StreamFieldPanel('modal_user_blocked'),
+            StreamFieldPanel('modal_user_not_exists'),
+            StreamFieldPanel('modal_confirm_email'),
+            StreamFieldPanel('modal_send_again'),
+            StreamFieldPanel('modal_mail_sent'),
+        ], heading='Модальные окна'),
+        StreamFieldPanel('api_links')]
 
     class Meta:
         verbose_name = 'Страница авторизации'
         verbose_name_plural = 'Страницы авторизации'
 
 
+class OwnerCollectionsPage(Page):
+    max_count = 1
+
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
+
+    page_subheader = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Подзаголовок')
+
+    filter_before = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр - от')
+
+    filter_after = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр - до')
+
+    filter_terminal = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр - по номеру терминала')
+
+    send_report_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отправить отчет')
+
+    filter_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Кнопка отфильтровать')
+
+    table_number = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Идентификатор')
+
+    table_count_payments = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Кол-во платежей')
+
+    table_sum_payments = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сумма платежей')
+
+    table_bills_count = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Кол-во купюр')
+
+    table_sum_bills = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Общая сумма купюр')
+
+    table_coins_count = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Кол-во монет')
+
+    table_coins_sum = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Общая сумма монет')
+
+    table_collections_sum = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Общая сумма инкассаций')
+
+    table_bills = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Купюры')
+
+    table_coins = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Монеты')
+
+    invalid_date = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверная дата')
+
+    invalid_terminal = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный номер терминала')
+
+    invalid_email = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный email')
+
+    modal_send_report = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отправить отчет')
+
+    modal_success = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отчет отправлен')
+
+    collections_per_page = models.PositiveSmallIntegerField(
+        default=5,
+        null=True,
+        verbose_name='Количество записей на странице'
+    )
+
+    api_links = StreamField([
+        ('api_block', ApiBlock())
+    ], null=True)
+
+    content_panels = Page.content_panels + [
+        MultiFieldPanel([
+            StreamFieldPanel('page_header'),
+            StreamFieldPanel('page_subheader'),
+        ], heading='Заголовки'),
+        MultiFieldPanel([
+            StreamFieldPanel('send_report_text'),
+            StreamFieldPanel('filter_button')
+        ], heading='Кнопки'),
+        MultiFieldPanel([
+            StreamFieldPanel('filter_before'),
+            StreamFieldPanel('filter_after'),
+            StreamFieldPanel('filter_terminal')
+        ], heading='Параметры фильтров'),
+        MultiFieldPanel([
+            StreamFieldPanel('invalid_date'),
+            StreamFieldPanel('invalid_terminal'),
+            StreamFieldPanel('invalid_email')
+        ], heading='Ошибки валидации'),
+        MultiFieldPanel([
+            StreamFieldPanel('modal_send_report'),
+            StreamFieldPanel('modal_success')
+        ], heading='Модальные окна'),
+        MultiFieldPanel([
+            StreamFieldPanel('table_number'),
+            StreamFieldPanel('table_count_payments'),
+            StreamFieldPanel('table_sum_payments'),
+            StreamFieldPanel('table_bills_count'),
+            StreamFieldPanel('table_sum_bills'),
+            StreamFieldPanel('table_coins_count'),
+            StreamFieldPanel('table_coins_sum'),
+            StreamFieldPanel('table_collections_sum'),
+            StreamFieldPanel('table_bills'),
+            StreamFieldPanel('table_coins')
+        ], heading='Таблица'),
+        FieldPanel('collections_per_page'),
+        StreamFieldPanel('api_links')
+    ]
+
+    class Meta:
+        verbose_name = 'Страница инкассаций'
+        verbose_name_plural = 'Страницы инкассаций'
+
+
+class OwnerReceivers(Page):
+    max_count = 1
+
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
+
+    page_subheader = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Подзаголовок')
+
+    filter_full_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр по ФИО')
+
+    import_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Импортировать')
+
+    table_surname = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фамилия')
+
+    table_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Имя')
+
+    table_patronymic = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отчество')
+
+    table_identity = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Идентификатор')
+
+    table_phone = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Телефон')
+
+    table_cells = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Ячейки')
+
+    file_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Ошибка при чтении файла')
+
+    clients_per_page = models.PositiveSmallIntegerField(
+        default=5,
+        null=True,
+        verbose_name='Количество записей на странице'
+    )
+
+    api_links = StreamField([
+        ('api_block', ApiBlock())
+    ], null=True)
+
+    content_panels = Page.content_panels + [
+        MultiFieldPanel([
+            StreamFieldPanel('page_header'),
+            StreamFieldPanel('page_subheader')
+        ], heading='Заголовок на странице'),
+        MultiFieldPanel([
+            StreamFieldPanel('filter_full_name')
+        ], heading='Фильтр'),
+        MultiFieldPanel([
+            StreamFieldPanel('import_button')
+        ], heading='Кнопки'),
+        MultiFieldPanel([
+            StreamFieldPanel('file_error')
+        ], heading='Модальные окна'),
+        MultiFieldPanel([
+            StreamFieldPanel('table_surname'),
+            StreamFieldPanel('table_name'),
+            StreamFieldPanel('table_patronymic'),
+            StreamFieldPanel('table_identity'),
+            StreamFieldPanel('table_phone'),
+            StreamFieldPanel('table_cells')
+        ], heading='Таблица'),
+        FieldPanel('clients_per_page'),
+    ]
+
+    class Meta:
+        verbose_name_plural = 'Страница получателей'
+        verbose_name = 'Страница получателей'
+
+
+class OwnerClients(Page):
+    max_count = 1
+
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
+
+    page_subheader = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Подзаголовок')
+
+    filter_full_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр по ФИО')
+
+    import_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Импортировать')
+
+    table_surname = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фамилия')
+
+    table_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Имя')
+
+    table_patronymic = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отчество')
+
+    table_identity = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Идентификатор')
+
+    table_phone = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Телефон')
+
+    table_cells = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Ячейки')
+
+    file_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Ошибка при чтении файла')
+
+    clients_per_page = models.PositiveSmallIntegerField(
+        default=5,
+        null=True,
+        verbose_name='Количество записей на странице'
+    )
+
+    api_links = StreamField([
+        ('api_block', ApiBlock())
+    ], null=True)
+
+    content_panels = Page.content_panels + [
+        MultiFieldPanel([
+            StreamFieldPanel('page_header'),
+            StreamFieldPanel('page_subheader')
+        ], heading='Заголовок на странице'),
+        MultiFieldPanel([
+            StreamFieldPanel('filter_full_name')
+        ], heading='Фильтр'),
+        MultiFieldPanel([
+            StreamFieldPanel('import_button')
+        ], heading='Кнопки'),
+        MultiFieldPanel([
+            StreamFieldPanel('file_error')
+        ], heading='Модальные окна'),
+        MultiFieldPanel([
+            StreamFieldPanel('table_surname'),
+            StreamFieldPanel('table_name'),
+            StreamFieldPanel('table_patronymic'),
+            StreamFieldPanel('table_identity'),
+            StreamFieldPanel('table_phone'),
+            StreamFieldPanel('table_cells')
+        ], heading='Таблица'),
+        FieldPanel('clients_per_page'),
+    ]
+
+    class Meta:
+        verbose_name_plural = 'Страница клиентов'
+        verbose_name = 'Страница клиентов'
+
+
+class OwnerPaymentsPage(Page):
+    max_count = 1
+
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
+
+    page_subheader = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Подзаголовок')
+
+    filter_before = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр - от')
+
+    filter_after = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр - до')
+
+    filter_terminal = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр - по номеру терминала')
+
+    send_report_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отправить отчет')
+
+    filter_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Кнопка отфильтровать')
+
+    table_number = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Номер')
+
+    table_id = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Идентификатор платежа')
+
+    table_service = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Услуга')
+
+    table_sum = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сумма')
+
+    table_type = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Тип оплаты')
+
+    table_date = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Дата')
+
+    table_parameter = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Параметры')
+
+    invalid_date = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверная дата')
+
+    invalid_terminal = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный номер терминала')
+
+    invalid_email = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный email')
+
+    modal_send_report = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отправить отчет')
+
+    modal_success = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отчет отправлен')
+
+    payments_per_page = models.PositiveSmallIntegerField(
+        default=5,
+        null=True,
+        verbose_name='Количество записей на одной странице'
+    )
+
+    api_links = StreamField([
+        ('api_block', ApiBlock())
+    ], null=True)
+
+    content_panels = Page.content_panels + [
+        MultiFieldPanel([
+            StreamFieldPanel('page_header'),
+            StreamFieldPanel('page_subheader'),
+        ], heading='Заголовки'),
+        MultiFieldPanel([
+            StreamFieldPanel('send_report_text'),
+            StreamFieldPanel('filter_button')
+        ], heading='Кнопки'),
+        MultiFieldPanel([
+            StreamFieldPanel('filter_before'),
+            StreamFieldPanel('filter_after'),
+            StreamFieldPanel('filter_terminal')
+        ], heading='Параметры фильтров'),
+        MultiFieldPanel([
+            StreamFieldPanel('invalid_date'),
+            StreamFieldPanel('invalid_terminal'),
+            StreamFieldPanel('invalid_email')
+        ], heading='Ошибки валидации'),
+        MultiFieldPanel([
+            StreamFieldPanel('modal_send_report'),
+            StreamFieldPanel('modal_success')
+        ], heading='Модальные окна'),
+        MultiFieldPanel([
+            StreamFieldPanel('table_number'),
+            StreamFieldPanel('table_id'),
+            StreamFieldPanel('table_service'),
+            StreamFieldPanel('table_sum'),
+            StreamFieldPanel('table_type'),
+            StreamFieldPanel('table_date'),
+            StreamFieldPanel('table_parameter')
+        ], heading='Таблица'),
+        FieldPanel('payments_per_page'),
+        StreamFieldPanel('api_links')
+    ]
+
+    class Meta:
+        verbose_name = 'Страница платежей'
+        verbose_name_plural = 'Страницы платежей'
+
+
+class AccessesPage(Page):
+    max_count = 1
+
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
+
+    page_subheader = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Подзаголовок')
+
+    filter_before = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр - от')
+
+    filter_after = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр - до')
+
+    filter_terminal = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр - по номеру терминала')
+
+    send_report_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отправить отчет')
+
+    filter_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Кнопка отфильтровать')
+
+    table_surname = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фамилия')
+
+    table_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Имя')
+
+    table_patronymic = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отчество')
+
+    table_phone = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Телефон')
+
+    table_cell = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Номер ячейки')
+
+    table_status = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Статус')
+
+    table_status_datetime = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Дата установки статуса')
+
+    invalid_date = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверная дата')
+
+    invalid_terminal = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный номер терминала')
+
+    invalid_email = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный email')
+
+    modal_send_report = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отправить отчет')
+
+    modal_success = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отчет отправлен')
+
+    accesses_per_page = models.PositiveSmallIntegerField(
+        default=5,
+        null=True,
+        verbose_name='Количество записей на одной странице'
+    )
+
+    api_links = StreamField([
+        ('api_block', ApiBlock())
+    ], null=True)
+
+    content_panels = Page.content_panels + [
+        MultiFieldPanel([
+            StreamFieldPanel('page_header'),
+            StreamFieldPanel('page_subheader'),
+        ], heading='Заголовки'),
+        MultiFieldPanel([
+            StreamFieldPanel('send_report_text'),
+            StreamFieldPanel('filter_button')
+        ], heading='Кнопки'),
+        MultiFieldPanel([
+            StreamFieldPanel('filter_before'),
+            StreamFieldPanel('filter_after'),
+            StreamFieldPanel('filter_terminal')
+        ], heading='Параметры фильтров'),
+        MultiFieldPanel([
+            StreamFieldPanel('invalid_date'),
+            StreamFieldPanel('invalid_terminal'),
+            StreamFieldPanel('invalid_email')
+        ], heading='Ошибки валидации'),
+        MultiFieldPanel([
+            StreamFieldPanel('modal_send_report'),
+            StreamFieldPanel('modal_success')
+        ], heading='Модальные окна'),
+        MultiFieldPanel([
+            StreamFieldPanel('table_surname'),
+            StreamFieldPanel('table_name'),
+            StreamFieldPanel('table_patronymic'),
+            StreamFieldPanel('table_phone'),
+            StreamFieldPanel('table_cell'),
+            StreamFieldPanel('table_status'),
+            StreamFieldPanel('table_status_datetime')
+        ], heading='Таблица'),
+        FieldPanel('accesses_per_page'),
+        StreamFieldPanel('api_links')
+    ]
+
+    class Meta:
+        verbose_name_plural = 'Страница доступов'
+        verbose_name = 'Страница доступов'
+
+
+class StowagePage(Page):
+    max_count = 1
+
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
+
+    page_subheader = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Подзаголовок')
+
+    filter_before = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр - от')
+
+    filter_after = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр - до')
+
+    filter_terminal = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр - по номеру терминала')
+
+    send_report_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отправить отчет')
+
+    filter_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Кнопка отфильтровать')
+
+    invalid_date = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверная дата')
+
+    invalid_terminal = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный номер терминала')
+
+    invalid_email = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный email')
+
+    modal_send_report = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отправить отчет')
+
+    modal_success = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отчет отправлен')
+
+    table_number = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Номер')
+
+    table_id = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Идентификатор хранения')
+
+    table_cell = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Номер ячейки')
+
+    table_tariff = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Тариф')
+
+    table_start_date = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Начало хранения')
+
+    table_end_date = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Конец хранения')
+
+    table_sum = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Оплаченная сумма хранения')
+
+    table_status = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Статус хранения')
+
+    table_messages = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сообщения')
+
+    storages_per_page = models.PositiveSmallIntegerField(
+        default=5,
+        null=True,
+        verbose_name='Количество записей на одной странице'
+    )
+
+    api_links = StreamField([
+        ('api_block', ApiBlock())
+    ], null=True)
+
+    content_panels = Page.content_panels + [
+        MultiFieldPanel([
+            StreamFieldPanel('page_header'),
+            StreamFieldPanel('page_subheader'),
+        ], heading='Заголовки'),
+        MultiFieldPanel([
+            StreamFieldPanel('send_report_text'),
+            StreamFieldPanel('filter_button')
+        ], heading='Кнопки'),
+        MultiFieldPanel([
+            StreamFieldPanel('filter_before'),
+            StreamFieldPanel('filter_after'),
+            StreamFieldPanel('filter_terminal')
+        ], heading='Параметры фильтров'),
+        MultiFieldPanel([
+            StreamFieldPanel('invalid_date'),
+            StreamFieldPanel('invalid_terminal'),
+            StreamFieldPanel('invalid_email')
+        ], heading='Ошибки валидации'),
+        MultiFieldPanel([
+            StreamFieldPanel('modal_send_report'),
+            StreamFieldPanel('modal_success')
+        ], heading='Модальные окна'),
+        MultiFieldPanel([
+            StreamFieldPanel('table_number'),
+            StreamFieldPanel('table_id'),
+            StreamFieldPanel('table_cell'),
+            StreamFieldPanel('table_tariff'),
+            StreamFieldPanel('table_start_date'),
+            StreamFieldPanel('table_end_date'),
+            StreamFieldPanel('table_sum'),
+            StreamFieldPanel('table_status'),
+            StreamFieldPanel('table_messages')
+        ], heading='Таблица'),
+        FieldPanel('storages_per_page'),
+        StreamFieldPanel('api_links')
+    ]
+
+    class Meta:
+        verbose_name_plural = 'Страница закладок'
+        verbose_name = 'Страница закладок'
+
+
+class StoragesPage(Page):
+    max_count = 1
+
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
+
+    page_subheader = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Подзаголовок')
+
+    filter_before = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр - от')
+
+    filter_after = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр - до')
+
+    filter_terminal = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр - по номеру терминала')
+
+    send_report_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отправить отчет')
+
+    filter_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Кнопка отфильтровать')
+
+    invalid_date = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверная дата')
+
+    invalid_terminal = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный номер терминала')
+
+    invalid_email = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный email')
+
+    modal_send_report = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отправить отчет')
+
+    modal_success = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отчет отправлен')
+
+    table_number = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Номер')
+
+    table_id = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Идентификатор хранения')
+
+    table_cell = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Номер ячейки')
+
+    table_tariff = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Тариф')
+
+    table_start_date = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Начало хранения')
+
+    table_end_date = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Конец хранения')
+
+    table_sum = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Оплаченная сумма хранения')
+
+    table_status = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Статус хранения')
+
+    table_messages = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сообщения')
+
+    storages_per_page = models.PositiveSmallIntegerField(
+        default=5,
+        null=True,
+        verbose_name='Количество записей на одной странице'
+    )
+
+    api_links = StreamField([
+        ('api_block', ApiBlock())
+    ], null=True)
+
+    content_panels = Page.content_panels + [
+        MultiFieldPanel([
+            StreamFieldPanel('page_header'),
+            StreamFieldPanel('page_subheader'),
+        ], heading='Заголовки'),
+        MultiFieldPanel([
+            StreamFieldPanel('send_report_text'),
+            StreamFieldPanel('filter_button')
+        ], heading='Кнопки'),
+        MultiFieldPanel([
+            StreamFieldPanel('filter_before'),
+            StreamFieldPanel('filter_after'),
+            StreamFieldPanel('filter_terminal')
+        ], heading='Параметры фильтров'),
+        MultiFieldPanel([
+            StreamFieldPanel('invalid_date'),
+            StreamFieldPanel('invalid_terminal'),
+            StreamFieldPanel('invalid_email')
+        ], heading='Ошибки валидации'),
+        MultiFieldPanel([
+            StreamFieldPanel('modal_send_report'),
+            StreamFieldPanel('modal_success')
+        ], heading='Модальные окна'),
+        MultiFieldPanel([
+            StreamFieldPanel('table_number'),
+            StreamFieldPanel('table_id'),
+            StreamFieldPanel('table_cell'),
+            StreamFieldPanel('table_tariff'),
+            StreamFieldPanel('table_start_date'),
+            StreamFieldPanel('table_end_date'),
+            StreamFieldPanel('table_sum'),
+            StreamFieldPanel('table_status'),
+            StreamFieldPanel('table_messages')
+        ], heading='Таблица'),
+        FieldPanel('storages_per_page'),
+        StreamFieldPanel('api_links')
+    ]
+
+    class Meta:
+        verbose_name_plural = 'Страница хранений'
+        verbose_name = 'Страница хранений'
+
+
+class TariffsPage(Page):
+    max_count = 1
+
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
+
+    add_tariff_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок (добавить тариф)')
+
+    page_subheader = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Подзаголовок')
+
+    cell_param_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Добавьте хотя бы один типоразмер')
+
+    terminal_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Добавьте хотя бы один терминал')
+
+    tariff_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Добавьте хотя бы один тариф')
+
+    name_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Имя')
+
+    interval_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Интервал')
+
+    invalid_diapason_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Интервал (неверный диапазон)')
+
+    language_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Ввести хотя бы один язык')
+
+    invalid_data = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Проверьте правильность введенных данных')
+
+    price_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Цена')
+
+    name_field = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Наименование')
+
+    text_field = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Текст')
+
+    interval_field = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Интервал')
+
+    price_field = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Цена')
+
+    description_field = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Описание')
+
+    save_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сохранить')
+
+    back_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Вернуться')
+
+    success_add = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Успешное добавление тарифа')
+
+    tariffs_tab = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Тарифы')
+
+    attachments_tab = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Привязки')
+
+    add_tariff_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Добавить тариф')
+
+    add_attachment_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Добавить привязку')
+
+    table_number = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Номер')
+
+    table_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Название')
+
+    table_interval = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Интервал')
+
+    table_price = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Цена')
+
+    table_status = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Статус')
+
+    table_status_datetime = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Дата установки статуса')
+
+    delete_tariff = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Вы действительно хотите удалить тариф?')
+
+    success_delete = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Тариф успешно удален')
+
+    table_tariff_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Название тарифа')
+
+    table_terminal_number = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Номер терминала')
+
+    table_cell = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Типоразмер ячейки')
+
+    table_position = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Позиция')
+
+    table_datetime = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Дата установки')
+
+    modal_delete_attachment = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Вы действительно хотите удалить привязку?')
+
+    modal_delete_attachment_success = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Привязка успешно удалена!')
+
+    position_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Введите пожалуйста позицию')
+
+    date_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Введите пожалуйста дату')
+
+    add_tariff_attachment_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Добавить привязку')
+
+    field_tariff = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Тариф')
+
+    field_terminal = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Терминал')
+
+    field_cell_parameter = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Типоразмер ячеек')
+
+    field_position = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Позиция')
+
+    field_date_start = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Дата начала')
+
+    field_description = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Описание')
+
+    success_add_attachment = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Привязка успешно добавлена!')
+
+    success_edit_attachment = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Привязка успешно изменена!')
+
+    edit_tariff_attachment_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Изменить привязку')
+
+    tariffs_per_page = models.PositiveSmallIntegerField(
+        default=5,
+        null=True,
+        verbose_name='Количество записей на одной странице'
+    )
+
+    api_links = StreamField([
+        ('api_block', ApiBlock())
+    ], null=True)
+
+    content_panels = Page.content_panels + [
+        MultiFieldPanel([
+            StreamFieldPanel('page_header'),
+            StreamFieldPanel('page_subheader'),
+            StreamFieldPanel('add_tariff_header'),
+            StreamFieldPanel('add_tariff_attachment_header'),
+            StreamFieldPanel('edit_tariff_attachment_header')
+        ], heading='Заголовки'),
+        MultiFieldPanel([
+            StreamFieldPanel('table_number'),
+            StreamFieldPanel('table_name'),
+            StreamFieldPanel('table_interval'),
+            StreamFieldPanel('table_price'),
+            StreamFieldPanel('table_status'),
+            StreamFieldPanel('table_status_datetime'),
+        ], heading='Таблица (тарифы)'),
+        MultiFieldPanel([
+            StreamFieldPanel('table_tariff_name'),
+            StreamFieldPanel('table_terminal_number'),
+            StreamFieldPanel('table_cell'),
+            StreamFieldPanel('table_position'),
+            StreamFieldPanel('table_datetime'),
+        ], heading='Таблица (привязки)'),
+        MultiFieldPanel([
+            StreamFieldPanel('cell_param_error'),
+            StreamFieldPanel('name_error'),
+            StreamFieldPanel('terminal_error'),
+            StreamFieldPanel('tariff_error'),
+            StreamFieldPanel('interval_error'),
+            StreamFieldPanel('invalid_diapason_error'),
+            StreamFieldPanel('price_error'),
+            StreamFieldPanel('position_error'),
+            StreamFieldPanel('date_error'),
+        ], heading='Ошибки валидации'),
+        MultiFieldPanel([
+            StreamFieldPanel('invalid_data'),
+            StreamFieldPanel('language_error'),
+            StreamFieldPanel('success_add'),
+            StreamFieldPanel('success_delete'),
+            StreamFieldPanel('delete_tariff'),
+            StreamFieldPanel('modal_delete_attachment'),
+            StreamFieldPanel('modal_delete_attachment_success'),
+            StreamFieldPanel('success_add_attachment'),
+            StreamFieldPanel('success_edit_attachment')
+        ], heading='Модальные окна'),
+        MultiFieldPanel([
+            StreamFieldPanel('name_field'),
+            StreamFieldPanel('price_field'),
+            StreamFieldPanel('interval_field'),
+            StreamFieldPanel('text_field'),
+            StreamFieldPanel('description_field'),
+            StreamFieldPanel('field_tariff'),
+            StreamFieldPanel('field_terminal'),
+            StreamFieldPanel('field_cell_parameter'),
+            StreamFieldPanel('field_position'),
+            StreamFieldPanel('field_date_start'),
+            StreamFieldPanel('field_description')
+        ], heading='Заголовки полей'),
+        MultiFieldPanel([
+            StreamFieldPanel('add_tariff_button'),
+            StreamFieldPanel('add_attachment_button'),
+            StreamFieldPanel('tariffs_tab'),
+            StreamFieldPanel('attachments_tab'),
+            StreamFieldPanel('save_button'),
+            StreamFieldPanel('back_button')
+        ], heading='Кнопки'),
+        FieldPanel('tariffs_per_page'),
+        StreamFieldPanel('api_links')
+    ]
+
+    class Meta:
+        verbose_name_plural = 'Страница тарифов'
+        verbose_name = 'Страница тарифов'
+
+
 class DictionaryPage(Page):
     max_count = 1
 
-    page_header = models.CharField(
-        max_length=100,
-        null=True,
-        verbose_name='Заголовок на странице (ru)',
-        default='Справочники'
-    )
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
 
-    page_header_en = models.CharField(
-        max_length=100,
-        null=True,
-        verbose_name='Заголовок на странице (en)',
-        default='Dictionaries'
-    )
+    add_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок - добавить позицию')
 
-    button_add = models.CharField(
-        max_length=50,
-        null=True,
-        verbose_name='Добавить (ru)',
-        default='Добавить'
-    )
+    edit_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок - редактировать позицию')
 
-    button_add_en = models.CharField(
-        max_length=50,
-        null=True,
-        verbose_name='Добавить (en)',
-        default='Add'
-    )
+    button_add = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Кнопка добавить')
 
-    filter_dict_text = models.CharField(
-        max_length=50,
-        null=True,
-        verbose_name='Фильтр (ru)',
-        default='Фильтр'
-    )
+    filter_dict_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр')
 
-    filter_dict_text_en = models.CharField(
-        max_length=50,
-        null=True,
-        verbose_name='Фильтр (en)',
-        default='Filter'
-    )
+    table_position = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Номер позиции')
 
-    table_position = models.CharField(
-        max_length=50,
-        null=True,
-        verbose_name='Номер позиции - таблица (ru)',
-        default='Номер позиции'
-    )
+    table_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Наименование')
 
-    table_position_en = models.CharField(
-        max_length=50,
-        null=True,
-        verbose_name='Position number - Table (en)',
-        default='Position number'
-    )
+    table_description = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Описание')
 
-    table_name = models.CharField(
-        max_length=50,
-        null=True,
-        verbose_name='Наименование - таблица (ru)',
-        default='Номер позиции'
-    )
+    position_add_modal = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Добавление типоразмера - сообщение')
 
-    table_name_en = models.CharField(
-        max_length=50,
-        null=True,
-        verbose_name='Name - Table (en)',
-        default='Name'
-    )
+    language_error_modal = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Добавление типоразмера - не указан язык')
 
-    table_description = models.CharField(
-        max_length=50,
-        null=True,
-        verbose_name='Описание - таблица (ru)',
-        default='Описание'
-    )
+    position_delete = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Удаление типоразмера - сообщение')
 
-    table_description_en = models.CharField(
-        max_length=50,
-        null=True,
-        verbose_name='Description - Table (en)',
-        default='Description'
-    )
+    position_delete_success = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Удаление типоразмера - успешно удален')
+
+    position_edit_success = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Типоразмер успешно изменен!')
+
+    field_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Наименование')
+
+    field_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Текст')
+
+    field_height = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Высота')
+
+    field_width = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Ширина')
+
+    field_depth = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Глубина')
+
+    field_weight = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Максимальный вес')
+
+    field_description = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Описание')
+
+    save_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сохранить')
+
+    back_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Вернуться')
+
+    delete_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Кнопка - удалить')
+
+    name_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Имя')
+
+    text_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Tекст')
+
+    height_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Высота')
+
+    width_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Ширина')
+
+    depth_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Глубина')
+
+    weight_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Вес')
+
+    description_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Описание')
 
     api_links = StreamField([
         ('api_block', ApiBlock())
@@ -263,32 +1667,47 @@ class DictionaryPage(Page):
     )
 
     content_panels = Page.content_panels + [
-        FieldRowPanel([
-            FieldPanel('page_header'),
-            FieldPanel('page_header_en')
-        ]),
-        FieldRowPanel([
-            FieldPanel('button_add'),
-            FieldPanel('button_add_en')
-        ]),
-        FieldRowPanel([
-            FieldPanel('filter_dict_text'),
-            FieldPanel('filter_dict_text_en')
-        ]),
         MultiFieldPanel([
-            FieldRowPanel([
-                FieldPanel('table_position'),
-                FieldPanel('table_position_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('table_name'),
-                FieldPanel('table_name_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('table_description'),
-                FieldPanel('table_description_en')
-            ])
-        ], heading='Таблица (Table)'),
+            StreamFieldPanel('page_header'),
+            StreamFieldPanel('add_header'),
+            StreamFieldPanel('edit_header'),
+            StreamFieldPanel('button_add'),
+            StreamFieldPanel('filter_dict_text'),
+        ], heading='Заголовки'),
+        MultiFieldPanel([
+            StreamFieldPanel('table_position'),
+            StreamFieldPanel('table_name'),
+            StreamFieldPanel('table_description'),
+        ], heading='Таблица'),
+        MultiFieldPanel([
+            StreamFieldPanel('position_delete'),
+            StreamFieldPanel('position_add_modal'),
+            StreamFieldPanel('language_error_modal'),
+            StreamFieldPanel('position_delete_success'),
+            StreamFieldPanel('position_edit_success'),
+        ], heading='Модальные окна'),
+        MultiFieldPanel([
+            StreamFieldPanel('field_name'),
+            StreamFieldPanel('field_text'),
+            StreamFieldPanel('field_height'),
+            StreamFieldPanel('field_width'),
+            StreamFieldPanel('field_depth'),
+            StreamFieldPanel('field_weight'),
+            StreamFieldPanel('field_description'),
+        ], heading='Надписи над полями'),
+        MultiFieldPanel([
+            StreamFieldPanel('name_error'),
+            StreamFieldPanel('height_error'),
+            StreamFieldPanel('width_error'),
+            StreamFieldPanel('depth_error'),
+            StreamFieldPanel('weight_error'),
+            StreamFieldPanel('description_error'),
+        ], heading='Ошибки валидации'),
+        MultiFieldPanel([
+            StreamFieldPanel('back_button'),
+            StreamFieldPanel('save_button'),
+            StreamFieldPanel('delete_button'),
+        ], heading='Кнопки'),
         FieldPanel('items_per_page'),
         StreamFieldPanel('api_links'),
     ]
@@ -301,11 +1720,9 @@ class DictionaryPage(Page):
 class AdministratorMainPage(Page):
     max_count = 1
 
-    page_header = models.CharField(
-        max_length=200,
-        null=True,
-        verbose_name='Заголовок на странице'
-    )
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
 
     total_terminals_groups_icon = models.ForeignKey(
         'wagtailimages.Image',
@@ -314,13 +1731,10 @@ class AdministratorMainPage(Page):
         verbose_name='Иконка',
         related_name='+'
     )
-    total_terminals_groups_text = models.CharField(
-        max_length=400,
-        null=True,
-        blank=True,
-        verbose_name='Текст',
-        default='Всего групп терминалов'
-    )
+
+    total_terminals_groups_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Всего групп терминалов')
 
     total_terminals_icon = models.ForeignKey(
         'wagtailimages.Image',
@@ -329,13 +1743,10 @@ class AdministratorMainPage(Page):
         verbose_name='Иконка',
         related_name='+'
     )
-    total_terminals_text = models.CharField(
-        max_length=400,
-        null=True,
-        blank=True,
-        verbose_name='Текст',
-        default='Всего терминалов'
-    )
+
+    total_terminals_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Всего терминалов')
 
     online_terminals_icon = models.ForeignKey(
         'wagtailimages.Image',
@@ -344,13 +1755,10 @@ class AdministratorMainPage(Page):
         verbose_name='Иконка',
         related_name='+'
     )
-    online_terminals_text = models.CharField(
-        max_length=400,
-        null=True,
-        blank=True,
-        verbose_name='Текст',
-        default='Количество терминалов онлайн'
-    )
+
+    online_terminals_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Количество терминалов онлайн')
 
     expired_terminals_icon = models.ForeignKey(
         'wagtailimages.Image',
@@ -359,13 +1767,10 @@ class AdministratorMainPage(Page):
         verbose_name='Иконка',
         related_name='+'
     )
-    expired_terminals_text = models.CharField(
-        max_length=400,
-        null=True,
-        blank=True,
-        verbose_name='Текст',
-        default='Просрочена активация'
-    )
+
+    expired_terminals_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Просрочена активация')
 
     pending_terminals_icon = models.ForeignKey(
         'wagtailimages.Image',
@@ -374,39 +1779,38 @@ class AdministratorMainPage(Page):
         verbose_name='Иконка',
         related_name='+'
     )
-    pending_terminals_text = models.CharField(
-        max_length=400,
-        null=True,
-        blank=True,
-        verbose_name='Текст',
-        default='В ожидании активации'
-    )
+
+    pending_terminals_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='В ожидании активации')
 
     api_links = StreamField([
         ('api_block', ApiBlock())
     ], null=True)
 
     content_panels = Page.content_panels + [
-        FieldPanel('page_header'),
+        MultiFieldPanel([
+            StreamFieldPanel('page_header'),
+        ], heading='Заголовки'),
         MultiFieldPanel([
             ImageChooserPanel('total_terminals_groups_icon'),
-            FieldPanel('total_terminals_groups_text')
+            StreamFieldPanel('total_terminals_groups_text')
         ], heading='Первый блок (Всего групп терминалов)'),
         MultiFieldPanel([
             ImageChooserPanel('total_terminals_icon'),
-            FieldPanel('total_terminals_text')
+            StreamFieldPanel('total_terminals_text')
         ], heading='Второй блок (Всего терминалов)'),
         MultiFieldPanel([
             ImageChooserPanel('online_terminals_icon'),
-            FieldPanel('online_terminals_text')
+            StreamFieldPanel('online_terminals_text')
         ], heading='Третий блок (Терминалы онлайн)'),
         MultiFieldPanel([
             ImageChooserPanel('expired_terminals_icon'),
-            FieldPanel('expired_terminals_text')
+            StreamFieldPanel('expired_terminals_text')
         ], heading='Четвертый блок (Просрочена активация)'),
         MultiFieldPanel([
             ImageChooserPanel('pending_terminals_icon'),
-            FieldPanel('pending_terminals_text')
+            StreamFieldPanel('pending_terminals_text')
         ], heading='Пятый блок (В ожидании активации)'),
         StreamFieldPanel('api_links')
     ]
@@ -444,12 +1848,81 @@ class SettingsPage(Page):
 class AdministratorTerminals(Page):
     max_count = 1
 
-    page_header = models.CharField(
-        max_length=100,
-        verbose_name='Заголовок на странице',
-        null=True,
-        default='Теминалы'
-    )
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
+
+    page_subheader = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Подзаголовок')
+
+    filter_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр по названию групп')
+
+    modal_prolong_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Продление активации')
+
+    modal_activate_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Срок окончания активации')
+
+    button_activate = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Активировать')
+
+    button_renew = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Продлить')
+
+    button_cancel = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отменить')
+
+    field_date = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Введите дату')
+
+    field_date_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Введите пожалуйста дату')
+
+    cancel_activation = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отклонить запрос на активацию')
+
+    deactivate = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отозвать активацию')
+
+    table_number = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Номер')
+
+    table_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Название группы')
+
+    table_config = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Конфигурация')
+
+    table_address = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Адрес')
+
+    table_key = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Ключ')
+
+    table_key_expires = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Окончание ключа')
+
+    table_status = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Статус')
 
     api_links = StreamField([
         ('api_block', ApiBlock())
@@ -462,7 +1935,31 @@ class AdministratorTerminals(Page):
     )
 
     content_panels = Page.content_panels + [
-        FieldPanel('page_header'),
+        MultiFieldPanel([
+            StreamFieldPanel('page_header'),
+            StreamFieldPanel('page_subheader'),
+            StreamFieldPanel('filter_text'),
+            StreamFieldPanel('button_activate'),
+            StreamFieldPanel('button_renew'),
+            StreamFieldPanel('button_cancel')
+        ], heading='Заголовки'),
+        MultiFieldPanel([
+            StreamFieldPanel('modal_prolong_header'),
+            StreamFieldPanel('modal_activate_header'),
+            StreamFieldPanel('field_date'),
+            StreamFieldPanel('field_date_error'),
+            StreamFieldPanel('cancel_activation'),
+            StreamFieldPanel('deactivate')
+        ], heading='Модальные окна'),
+        MultiFieldPanel([
+            StreamFieldPanel('table_number'),
+            StreamFieldPanel('table_name'),
+            StreamFieldPanel('table_address'),
+            StreamFieldPanel('table_config'),
+            StreamFieldPanel('table_key'),
+            StreamFieldPanel('table_key_expires'),
+            StreamFieldPanel('table_status')
+        ], heading='Таблица'),
         FieldPanel('terminals_per_page'),
         StreamFieldPanel('api_links'),
     ]
@@ -474,145 +1971,85 @@ class AdministratorTerminals(Page):
 class AdministratorProfile(Page):
     max_count = 1
 
-    page_header = models.CharField(
-        max_length=100,
-        verbose_name='Заголовок на странице (ru)',
-        null=True,
-        default='Мой профиль'
-    )
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
 
-    page_header_en = models.CharField(
-        max_length=100,
-        verbose_name='Заголовок на странице (en)',
-        null=True,
-        default='My profile'
-    )
+    change_pass_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сменить пароль')
 
-    change_password_header = models.CharField(
-        max_length=100,
-        verbose_name='Заголовок для смены пароля (ru)',
-        null=True,
-        default='Сменить пароль'
-    )
+    save_profile_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сохранить')
 
-    change_password_header_en = models.CharField(
-        max_length=100,
-        verbose_name='Заголовок для смены пароля (en)',
-        null=True,
-        default='Change password'
-    )
+    change_password_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сменить пароль')
 
-    save_profile_button = models.CharField(
-        max_length=100,
-        verbose_name='Кнопка сохранить (ru)',
-        null=True,
-        default='Сохранить'
-    )
+    label_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Имя')
 
-    save_profile_button_en = models.CharField(
-        max_length=100,
-        verbose_name='Кнопка сохранить (en)',
-        null=True,
-        default='Save'
-    )
+    label_surname = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фамилия')
 
-    change_password_button = models.CharField(
-        max_length=100,
-        verbose_name='Кнопка сменить пароль (ru)',
-        null=True,
-        default='Сменить пароль'
-    )
+    label_patronymic = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отчество')
 
-    change_password_button_en = models.CharField(
-        max_length=100,
-        verbose_name='Кнопка сменить пароль (en)',
-        null=True,
-        default='Change password'
-    )
+    label_phone = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Телефон')
 
-    label_name = models.CharField(
-        max_length=100,
-        verbose_name='Название поля имени (ru)',
-        null=True,
-        default='Имя'
-    )
+    label_password = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Введите пароль')
 
-    label_name_en = models.CharField(
-        max_length=100,
-        verbose_name='Название поля имени (en)',
-        null=True,
-        default='Name'
-    )
+    label_repeat_password = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Повторите пароль')
 
-    label_surname = models.CharField(
-        max_length=100,
-        verbose_name='Название поля фамилии (ru)',
-        null=True,
-        default='Фамилия'
-    )
+    modal_success = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Успешное сохранение')
 
-    label_surname_en = models.CharField(
-        max_length=100,
-        verbose_name='Название поля фамилии (en)',
-        null=True,
-        default='Surname'
-    )
+    invalid_email_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Ошибка - email')
 
-    label_patronymic = models.CharField(
-        max_length=100,
-        verbose_name='Название поля отчество (ru)',
-        null=True,
-        default='Отчество'
-    )
+    invalid_name_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Ошибка - имя')
 
-    label_patronymic_en = models.CharField(
-        max_length=100,
-        verbose_name='Название поля отчество (en)',
-        null=True,
-        default='Patronymic'
-    )
+    invalid_surname_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Ошибка - фамилия')
 
-    label_phone = models.CharField(
-        max_length=100,
-        verbose_name='Название поля телефона (ru)',
-        null=True,
-        default='Телефон'
-    )
+    invalid_phone_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Ошибка - телефон')
 
-    label_phone_en = models.CharField(
-        max_length=100,
-        verbose_name='Название поля телефона (en)',
-        null=True,
-        default='Phone'
-    )
+    password_success_changed = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пароль успешно изменен')
 
-    label_password = models.CharField(
-        max_length=100,
-        verbose_name='Название поля смены пароля (ru)',
-        null=True,
-        default='Введите пароль'
-    )
+    invalid_password_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пожалуйста введите пароль')
 
-    label_password_en = models.CharField(
-        max_length=100,
-        verbose_name='Название поля подтверждения пароля (en)',
-        null=True,
-        default='Input password'
-    )
+    invalid_password_repeat_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пожалуйста повторите пароль')
 
-    label_password_repeat = models.CharField(
-        max_length=100,
-        verbose_name='Название поля подтверждения пароля (ru)',
-        null=True,
-        default='Повторите пароль'
-    )
+    invalid_password_len_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пароль слишком короткий')
 
-    label_password_repeat_en = models.CharField(
-        max_length=100,
-        verbose_name='Название поля подтверждения пароля (en)',
-        null=True,
-        default='Repeat password'
-    )
+    invalid_password_mismatch_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пароли не совпадают')
 
     api_links = StreamField([
         ('api_block', ApiBlock())
@@ -620,65 +2057,225 @@ class AdministratorProfile(Page):
 
     content_panels = Page.content_panels + [
         MultiFieldPanel([
-            FieldRowPanel([
-                FieldPanel('page_header'),
-                FieldPanel('page_header_en'),
-            ])
+            StreamFieldPanel('page_header'),
         ], heading='Мой профиль'),
         MultiFieldPanel([
-            FieldRowPanel([
-                FieldPanel('change_password_header'),
-                FieldPanel('change_password_header_en')
-            ])
+            StreamFieldPanel('change_pass_header'),
         ], heading='Смена пароля'),
         MultiFieldPanel([
-            FieldRowPanel([
-                FieldPanel('label_name'),
-                FieldPanel('label_name_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('label_surname'),
-                FieldPanel('label_surname_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('label_patronymic'),
-                FieldPanel('label_patronymic_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('label_phone'),
-                FieldPanel('label_phone_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('label_password'),
-                FieldPanel('label_password_en')
-            ])
+            StreamFieldPanel('label_name'),
+            StreamFieldPanel('label_surname'),
+            StreamFieldPanel('label_patronymic'),
+            StreamFieldPanel('label_phone'),
+            StreamFieldPanel('label_password'),
+            StreamFieldPanel('label_repeat_password'),
         ], heading='Названия полей'),
         MultiFieldPanel([
-            FieldRowPanel([
-                FieldPanel('save_profile_button'),
-                FieldPanel('save_profile_button_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('change_password_button'),
-                FieldPanel('change_password_button_en')
-            ])
+            StreamFieldPanel('save_profile_button'),
+            StreamFieldPanel('change_password_button'),
         ], heading='Кнопки'),
+        MultiFieldPanel([
+            StreamFieldPanel('invalid_name_error'),
+            StreamFieldPanel('invalid_surname_error'),
+            StreamFieldPanel('invalid_phone_error'),
+            StreamFieldPanel('invalid_email_error'),
+            StreamFieldPanel('invalid_password_error'),
+            StreamFieldPanel('invalid_password_repeat_error'),
+            StreamFieldPanel('invalid_password_len_error'),
+            StreamFieldPanel('invalid_password_mismatch_error')
+        ], heading='Ошибки валидации'),
+        MultiFieldPanel([
+            StreamFieldPanel('modal_success'),
+            StreamFieldPanel('password_success_changed')
+        ], heading='Модальные окна'),
         StreamFieldPanel('api_links')
     ]
 
     class Meta:
-        verbose_name = 'Страница профиля'
+        verbose_name = 'Страница профиля администратора'
+
+
+class OwnerProfile(Page):
+    max_count = 1
+
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
+
+    change_pass_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сменить пароль')
+
+    save_profile_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сохранить')
+
+    change_password_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сменить пароль')
+
+    label_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Имя')
+
+    label_surname = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фамилия')
+
+    label_patronymic = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отчество')
+
+    label_phone = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Телефон')
+
+    label_password = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Введите пароль')
+
+    label_repeat_password = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Повторите пароль')
+
+    modal_success = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Успешное сохранение')
+
+    invalid_email_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Ошибка - email')
+
+    invalid_name_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Ошибка - имя')
+
+    invalid_surname_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Ошибка - фамилия')
+
+    invalid_phone_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Ошибка - телефон')
+
+    password_success_changed = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пароль успешно изменен')
+
+    invalid_password_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пожалуйста введите пароль')
+
+    invalid_password_repeat_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пожалуйста повторите пароль')
+
+    invalid_password_len_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пароль слишком короткий')
+
+    invalid_password_mismatch_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пароли не совпадают')
+
+    api_links = StreamField([
+        ('api_block', ApiBlock())
+    ], null=True)
+
+    content_panels = Page.content_panels + [
+        MultiFieldPanel([
+            StreamFieldPanel('page_header'),
+        ], heading='Мой профиль'),
+        MultiFieldPanel([
+            StreamFieldPanel('change_pass_header'),
+        ], heading='Смена пароля'),
+        MultiFieldPanel([
+            StreamFieldPanel('label_name'),
+            StreamFieldPanel('label_surname'),
+            StreamFieldPanel('label_patronymic'),
+            StreamFieldPanel('label_phone'),
+            StreamFieldPanel('label_password'),
+            StreamFieldPanel('label_repeat_password'),
+        ], heading='Названия полей'),
+        MultiFieldPanel([
+            StreamFieldPanel('save_profile_button'),
+            StreamFieldPanel('change_password_button'),
+        ], heading='Кнопки'),
+        MultiFieldPanel([
+            StreamFieldPanel('invalid_name_error'),
+            StreamFieldPanel('invalid_surname_error'),
+            StreamFieldPanel('invalid_phone_error'),
+            StreamFieldPanel('invalid_email_error'),
+            StreamFieldPanel('invalid_password_error'),
+            StreamFieldPanel('invalid_password_repeat_error'),
+            StreamFieldPanel('invalid_password_len_error'),
+            StreamFieldPanel('invalid_password_mismatch_error')
+        ], heading='Ошибки валидации'),
+        MultiFieldPanel([
+            StreamFieldPanel('modal_success'),
+            StreamFieldPanel('password_success_changed')
+        ], heading='Модальные окна'),
+        StreamFieldPanel('api_links')
+    ]
+
+    class Meta:
+        verbose_name = 'Страница профиля владельца'
 
 
 class TerminalGroupsPage(Page):
     max_count = 1
 
-    page_header = models.CharField(
-        max_length=100,
-        verbose_name='Заголовок на странице',
-        null=True,
-        default='Сотрудники'
-    )
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
+
+    page_subheader = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Подзаголовок')
+
+    filter_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр по названию групп')
+
+    table_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Название группы')
+
+    table_fio = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='ФИО')
+
+    table_phone = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Телефон')
+
+    table_configuration = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Конфигурация')
+
+    modal_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Править данные группы')
+
+    modal_button_save = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сохранить')
+
+    modal_button_cancel = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отменить')
+
+    modal_field_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Наименование')
+
+    modal_field_description = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Описание')
+
+    modal_field_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Введите пожалуйста наименование')
 
     groups_per_page = models.PositiveSmallIntegerField(
         default=7,
@@ -691,7 +2288,25 @@ class TerminalGroupsPage(Page):
     ], null=True, blank=True)
 
     content_panels = Page.content_panels + [
-        FieldPanel('page_header'),
+        MultiFieldPanel([
+            StreamFieldPanel('page_header'),
+            StreamFieldPanel('page_subheader'),
+            StreamFieldPanel('filter_text'),
+        ], heading='Заголовки'),
+        MultiFieldPanel([
+            StreamFieldPanel('table_name'),
+            StreamFieldPanel('table_fio'),
+            StreamFieldPanel('table_phone'),
+            StreamFieldPanel('table_configuration'),
+        ], heading='Таблица'),
+        MultiFieldPanel([
+            StreamFieldPanel('modal_header'),
+            StreamFieldPanel('modal_button_save'),
+            StreamFieldPanel('modal_button_cancel'),
+            StreamFieldPanel('modal_field_name'),
+            StreamFieldPanel('modal_field_description'),
+            StreamFieldPanel('modal_field_error'),
+        ], heading='Модальные окна'),
         FieldPanel('groups_per_page'),
         StreamFieldPanel('api_links'),
     ]
@@ -703,12 +2318,17 @@ class TerminalGroupsPage(Page):
 class AdminEmployeesPage(Page):
     max_count = 1
 
-    page_header = models.CharField(
-        max_length=100,
-        verbose_name='Заголовок на странице',
-        null=True,
-        default='Сотрудники'
-    )
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
+
+    page_subheader = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Управление сотрудниками')
+
+    change_password_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сменить пароль')
 
     employees_per_page = models.PositiveSmallIntegerField(
         default=7,
@@ -716,12 +2336,223 @@ class AdminEmployeesPage(Page):
         verbose_name='Количество сотрудников на одной странице'
     )
 
+    add_button_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Добавить')
+
+    table_surname = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фамилия')
+
+    table_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Имя')
+
+    table_patronymic = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отчество')
+
+    table_phone = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Телефон')
+
+    table_status = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Статус')
+
+    invalid_email_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Введите пожалуйста email')
+
+    invalid_name_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Введите пожалуйста имя')
+
+    invalid_phone_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Введите пожалуйста телефон')
+
+    invalid_surname_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Введите пожалуйста фамилию')
+
+    invalid_password_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Введите пожалуйста пароль')
+
+    invalid_password_repeat_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пожалуйста повторите пароль')
+
+    invalid_password_len_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Слишком короткий пароль')
+
+    invalid_identity_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пожалуйста введите идентификатор')
+
+    invalid_login_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пожалуйста введите логин')
+
+    modal_delete = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Вы точно хотите удалить сотрудника?')
+
+    field_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Имя')
+
+    field_surname = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фамилия')
+
+    field_patronymic = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отчество')
+
+    field_phone = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Телефон')
+
+    field_identity = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Идентификатор')
+
+    field_login = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Логин')
+
+    field_password = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пароль')
+
+    field_repeat_password = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Повторите пароль')
+
+    field_give_admin_role = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Дать права на работу с администратороами')
+
+    add_employee_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Добавить сотрудника')
+
+    save_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сохранить')
+
+    back_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Вернуться')
+
+    modal_email_exists = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пользователь с указанным email уже существует')
+
+    modal_phone_exists = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пользователь с указанным телефоном уже существует')
+
+    modal_success_add = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сотрудник успешно добавлен')
+
+    modal_success_edit = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сотрудник успешно изменен')
+
+    modal_role_duplicate = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Вы не можете добавить одинаковые роли')
+
+    edit_employee_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Редактировать сотрудника')
+
+    confirm_delete = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Да (удалить)')
+
+    reject_delete = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отмена (удаление)')
+
+    modal_block = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Блокировать сотрудника')
+
+    modal_unblock = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Разблокировать сотрудника')
+
+    change_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сменить')
+
+    modal_password_changed = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пароль успешно изменен')
+
     api_links = StreamField([
         ('api_block', ApiBlock())
-    ], null=True, blank=True)
+    ], null=True)
 
     content_panels = Page.content_panels + [
-        FieldPanel('page_header'),
+        MultiFieldPanel([
+            StreamFieldPanel('page_header'),
+            StreamFieldPanel('page_subheader'),
+            StreamFieldPanel('add_employee_header'),
+            StreamFieldPanel('edit_employee_header'),
+            StreamFieldPanel('change_password_header'),
+        ], heading='Заголовки'),
+        MultiFieldPanel([
+            StreamFieldPanel('add_button_name'),
+            StreamFieldPanel('change_button'),
+            StreamFieldPanel('save_button'),
+            StreamFieldPanel('back_button')
+        ], heading='Кнопки'),
+        MultiFieldPanel([
+            StreamFieldPanel('table_surname'),
+            StreamFieldPanel('table_name'),
+            StreamFieldPanel('table_patronymic'),
+            StreamFieldPanel('table_phone'),
+            StreamFieldPanel('table_status')
+        ], heading='Таблица'),
+        MultiFieldPanel([
+            StreamFieldPanel('invalid_email_error'),
+            StreamFieldPanel('invalid_name_error'),
+            StreamFieldPanel('invalid_phone_error'),
+            StreamFieldPanel('invalid_surname_error'),
+            StreamFieldPanel('invalid_password_error'),
+            StreamFieldPanel('invalid_password_repeat_error'),
+            StreamFieldPanel('invalid_password_len_error'),
+            StreamFieldPanel('invalid_identity_error'),
+            StreamFieldPanel('invalid_login_error')
+        ], heading='Ошибки валидации'),
+        MultiFieldPanel([
+            StreamFieldPanel('field_name'),
+            StreamFieldPanel('field_surname'),
+            StreamFieldPanel('field_patronymic'),
+            StreamFieldPanel('field_phone'),
+            StreamFieldPanel('field_password'),
+            StreamFieldPanel('field_repeat_password'),
+            StreamFieldPanel('field_give_admin_role')
+        ], heading='Надписи над полями ввода'),
+        MultiFieldPanel([
+            StreamFieldPanel('modal_delete'),
+            StreamFieldPanel('modal_block'),
+            StreamFieldPanel('modal_unblock'),
+            StreamFieldPanel('confirm_delete'),
+            StreamFieldPanel('reject_delete'),
+            StreamFieldPanel('modal_email_exists'),
+            StreamFieldPanel('modal_phone_exists'),
+            StreamFieldPanel('modal_success_add'),
+            StreamFieldPanel('modal_success_edit'),
+            StreamFieldPanel('modal_password_changed'),
+        ], heading='Модальные окна'),
         FieldPanel('employees_per_page'),
         StreamFieldPanel('api_links'),
     ]
@@ -733,33 +2564,13 @@ class AdminEmployeesPage(Page):
 class OwnerEmpoloyeesPage(Page):
     max_count = 1
 
-    page_header = models.CharField(
-        max_length=100,
-        verbose_name='Заголовок на странице (ru)',
-        null=True,
-        default='Сотрудники'
-    )
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
 
-    page_header_en = models.CharField(
-        max_length=100,
-        verbose_name='Заголовок на странице (en)',
-        null=True,
-        default='Employees'
-    )
-
-    page_subheader = models.CharField(
-        max_length=100,
-        verbose_name='Подзаголовок на странице (ru)',
-        null=True,
-        default='Управление сотрудниками'
-    )
-
-    page_subheader_en = models.CharField(
-        max_length=100,
-        verbose_name='Подзаголовок на странице (en)',
-        null=True,
-        default='Employee management'
-    )
+    page_subheader = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Управление сотрудниками')
 
     employees_per_page = models.PositiveSmallIntegerField(
         default=7,
@@ -767,90 +2578,133 @@ class OwnerEmpoloyeesPage(Page):
         verbose_name='Количество сотрудников на одной странице'
     )
 
-    add_button_name = models.CharField(
-        max_length=100,
-        verbose_name='Кнопка добавить сотрудника (ru)',
-        null=True,
-        default='Добавить'
-    )
+    add_button_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Добавить')
 
-    add_button_name_en = models.CharField(
-        max_length=100,
-        verbose_name='Кнопка добавить сотрудника (en)',
-        null=True,
-        default='Add'
-    )
+    table_surname = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фамилия')
 
-    table_surname = models.CharField(
-        max_length=100,
-        verbose_name='Фамилия (ru)',
-        null=True,
-        default='Фамилия'
-    )
+    table_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Имя')
 
-    table_surname_en = models.CharField(
-        max_length=100,
-        verbose_name='Фамилия (en)',
-        null=True,
-        default='Surname'
-    )
+    table_patronymic = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отчество')
 
-    table_name = models.CharField(
-        max_length=100,
-        verbose_name='Имя (ru)',
-        null=True,
-        default='Имя'
-    )
+    table_phone = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Телефон')
 
-    table_name_en = models.CharField(
-        max_length=100,
-        verbose_name='Имя (en)',
-        null=True,
-        default='First name'
-    )
+    table_status = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Статус')
 
-    table_patronymic = models.CharField(
-        max_length=100,
-        verbose_name='Отчество (ru)',
-        null=True,
-        default='Отчество'
-    )
+    invalid_email_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Введите пожалуйста email')
 
-    table_patronymic_en = models.CharField(
-        max_length=100,
-        verbose_name='Отчество (en)',
-        null=True,
-        default='Patronymic'
-    )
+    invalid_name_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Введите пожалуйста имя')
 
-    table_phone = models.CharField(
-        max_length=100,
-        verbose_name='Телефон (ru)',
-        null=True,
-        default='Телефон'
-    )
+    invalid_phone_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Введите пожалуйста телефон')
 
-    table_phone_en = models.CharField(
-        max_length=100,
-        verbose_name='Телефон (en)',
-        null=True,
-        default='Phone'
-    )
+    invalid_surname_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Введите пожалуйста фамилию')
 
-    table_status = models.CharField(
-        max_length=100,
-        verbose_name='Статус (ru)',
-        null=True,
-        default='Статус'
-    )
+    invalid_password_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Введите пожалуйста пароль')
 
-    table_status_en = models.CharField(
-        max_length=100,
-        verbose_name='Статус (en)',
-        null=True,
-        default='Status'
-    )
+    invalid_password_len_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Слишком короткий пароль')
 
+    invalid_identity_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пожалуйста введите идентификатор')
+
+    invalid_login_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пожалуйста введите логин')
+
+    modal_delete = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Вы точно хотите удалить сотрудника?')
+
+    field_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Имя')
+
+    field_surname = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фамилия')
+
+    field_patronymic = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отчество')
+
+    field_phone = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Телефон')
+
+    field_identity = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Идентификатор')
+
+    field_login = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Логин')
+
+    field_password = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пароль')
+
+    field_choose_role = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Выбрать роль')
+
+    add_employee_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Добавить сотрудника')
+
+    add_role = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Добавить роль')
+
+    delete_role = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Удалить роль')
+
+    modal_login_exists = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пользователь с указанным логином уже существует')
+
+    modal_identity_exists = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пользователь с указанным идентификатором уже существует')
+
+    modal_success_add = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сотрудник успешно добавлен')
+
+    modal_success_edit = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сотрудник успешно изменен')
+
+    modal_role_duplicate = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Вы не можете добавить одинаковые роли')
+
+    edit_employee_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Редактировать сотрудника')
 
     api_links = StreamField([
         ('api_block', ApiBlock())
@@ -858,37 +2712,51 @@ class OwnerEmpoloyeesPage(Page):
 
     content_panels = Page.content_panels + [
         MultiFieldPanel([
-            FieldRowPanel([
-                FieldPanel('page_header'),
-                FieldPanel('page_subheader')
-            ])
+            StreamFieldPanel('page_header'),
+            StreamFieldPanel('page_subheader'),
+            StreamFieldPanel('add_employee_header'),
+            StreamFieldPanel('edit_employee_header'),
         ], heading='Заголовки'),
-        FieldRowPanel([
-            FieldPanel('add_button_name'),
-            FieldPanel('add_button_name_en')
-        ]),
         MultiFieldPanel([
-            FieldRowPanel([
-                FieldPanel('table_surname'),
-                FieldPanel('table_surname_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('table_name'),
-                FieldPanel('table_name_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('table_patronymic'),
-                FieldPanel('table_patronymic_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('table_phone'),
-                FieldPanel('table_phone_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('table_status'),
-                FieldPanel('table_status_en')
-            ]),
+            StreamFieldPanel('add_button_name'),
+            StreamFieldPanel('add_role'),
+            StreamFieldPanel('delete_role')
+        ], heading='Кнопки'),
+        MultiFieldPanel([
+            StreamFieldPanel('table_surname'),
+            StreamFieldPanel('table_name'),
+            StreamFieldPanel('table_patronymic'),
+            StreamFieldPanel('table_phone'),
+            StreamFieldPanel('table_status')
         ], heading='Таблица'),
+        MultiFieldPanel([
+            StreamFieldPanel('invalid_email_error'),
+            StreamFieldPanel('invalid_name_error'),
+            StreamFieldPanel('invalid_phone_error'),
+            StreamFieldPanel('invalid_surname_error'),
+            StreamFieldPanel('invalid_password_error'),
+            StreamFieldPanel('invalid_password_len_error'),
+            StreamFieldPanel('invalid_identity_error'),
+            StreamFieldPanel('invalid_login_error')
+        ], heading='Ошибки валидации'),
+        MultiFieldPanel([
+            StreamFieldPanel('field_name'),
+            StreamFieldPanel('field_surname'),
+            StreamFieldPanel('field_patronymic'),
+            StreamFieldPanel('field_phone'),
+            StreamFieldPanel('field_identity'),
+            StreamFieldPanel('field_login'),
+            StreamFieldPanel('field_password'),
+            StreamFieldPanel('field_choose_role')
+        ], heading='Надписи над полями ввода'),
+        MultiFieldPanel([
+            StreamFieldPanel('modal_delete'),
+            StreamFieldPanel('modal_login_exists'),
+            StreamFieldPanel('modal_identity_exists'),
+            StreamFieldPanel('modal_success_add'),
+            StreamFieldPanel('modal_role_duplicate'),
+            StreamFieldPanel('modal_success_edit'),
+        ], heading='Модальные окна'),
         FieldPanel('employees_per_page'),
         StreamFieldPanel('api_links'),
     ]
@@ -900,19 +2768,9 @@ class OwnerEmpoloyeesPage(Page):
 class SelectConfigurationPage(Page):
     max_count = 1
 
-    page_header = models.CharField(
-        max_length=100,
-        verbose_name='Заголовок на странице (ru)',
-        null=True,
-        default='Выбрать конфигурацию'
-    )
-
-    page_header_en = models.CharField(
-        max_length=100,
-        verbose_name='Заголовок на странице (en)',
-        null=True,
-        default='Choose configuration'
-    )
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Выбрать конфигурацию')
 
     akh_icon = models.ForeignKey(
         'wagtailimages.Image',
@@ -956,19 +2814,9 @@ class SelectConfigurationPage(Page):
         verbose_name='ID Concierge'
     )
 
-    button_choose_text = models.CharField(
-        max_length=300,
-        verbose_name='Кнопка выбрать конфигурацию (ru)',
-        null=True,
-        default='Выбрать'
-    )
-
-    button_choose_text_en = models.CharField(
-        max_length=300,
-        verbose_name='Кнопка выбрать конфигурацию (en)',
-        null=True,
-        default='Choose'
-    )
+    button_choose_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Выбрать')
 
     api_links = StreamField([
         ('api_block', ApiBlock())
@@ -976,10 +2824,8 @@ class SelectConfigurationPage(Page):
 
     content_panels = Page.content_panels + [
         MultiFieldPanel([
-            FieldRowPanel([
-                FieldPanel('page_header'),
-                FieldPanel('page_header_en')
-            ])
+            StreamFieldPanel('page_header'),
+            StreamFieldPanel('button_choose_text'),
         ], heading='Заголовок'),
         MultiFieldPanel([
             FieldPanel('akh_id'),
@@ -993,10 +2839,6 @@ class SelectConfigurationPage(Page):
             FieldPanel('concierge_id'),
             ImageChooserPanel('concierge_icon')
         ], heading='Третий блок (Консьерж)'),
-        FieldRowPanel([
-            FieldPanel('button_choose_text'),
-            FieldPanel('button_choose_text_en')
-        ]),
         StreamFieldPanel('api_links'),
     ]
 
@@ -1008,75 +2850,25 @@ class SelectConfigurationPage(Page):
 class OwnerTerminalsPage(Page):
     max_count = 1
 
-    page_header = models.CharField(
-        max_length=100,
-        verbose_name='Заголовок на странице (ru)',
-        null=True,
-        default='Терминалы'
-    )
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
 
-    page_header_en = models.CharField(
-        max_length=100,
-        verbose_name='Заголовок на странице (en)',
-        null=True,
-        default='Terminals'
-    )
+    page_subheader = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Подзаголовок')
 
-    page_subheader = models.CharField(
-        max_length=100,
-        verbose_name='Подзаголовок на странице (ru)',
-        null=True,
-        default='Список всех терминалов'
-    )
+    list_tab = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Список')
 
-    page_subheader_en = models.CharField(
-        max_length=100,
-        verbose_name='Подзаголовок на странице (en)',
-        null=True,
-        default='List of terminals'
-    )
+    map_tab = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Карта')
 
-    list_tab = models.CharField(
-        max_length=100,
-        verbose_name='Список (ru)',
-        null=True,
-        default='Список'
-    )
-
-    list_tab_en = models.CharField(
-        max_length=100,
-        verbose_name='Список (ru)',
-        null=True,
-        default='List'
-    )
-
-    map_tab = models.CharField(
-        max_length=100,
-        verbose_name='Карта (ru)',
-        null=True,
-        default='Карта'
-    )
-
-    map_tab_en = models.CharField(
-        max_length=100,
-        verbose_name='Карта (en)',
-        null=True,
-        default='Map'
-    )
-
-    add_terminal_button = models.CharField(
-        max_length=100,
-        verbose_name='Кнопка добавить (ru)',
-        null=True,
-        default='Добавить'
-    )
-
-    add_terminal_button_en = models.CharField(
-        max_length=100,
-        verbose_name='Кнопка добавить (en)',
-        null=True,
-        default='Add'
-    )
+    add_terminal_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Добавить')
 
     terminals_per_page = models.PositiveSmallIntegerField(
         default=7,
@@ -1090,103 +2882,229 @@ class OwnerTerminalsPage(Page):
         verbose_name='Количество ячеек на одной странице'
     )
 
-    table_number = models.CharField(
-        max_length=100,
-        verbose_name='Таблица - номер (ru)',
-        null=True,
-        default='Номер'
-    )
+    table_number = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Номер')
 
-    table_number_en = models.CharField(
-        max_length=100,
-        verbose_name='Таблица - номер (en)',
-        null=True,
-        default='Number'
-    )
+    table_address = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Адрес')
 
-    table_address = models.CharField(
-        max_length=100,
-        verbose_name='Таблица - адрес (ru)',
-        null=True,
-        default='Адрес'
-    )
+    table_key = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Ключ')
 
-    table_address_en = models.CharField(
-        max_length=100,
-        verbose_name='Таблица - адрес (en)',
-        null=True,
-        default='Address'
-    )
+    table_key_expires = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Срок ключа')
 
-    table_key = models.CharField(
-        max_length=100,
-        verbose_name='Таблица - ключ (ru)',
-        null=True,
-        default='Ключ'
-    )
+    table_status = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Статус')
 
-    table_key_en = models.CharField(
-        max_length=100,
-        verbose_name='Таблица - ключ (en)',
-        null=True,
-        default='Token'
-    )
+    table_datetime = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Дата установки')
 
-    table_key_expires = models.CharField(
-        max_length=100,
-        verbose_name='Таблица - срок ключа (ru)',
-        null=True,
-        default='Срок ключа'
-    )
+    table_cells_count = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Кол-во ячеек')
 
-    table_key_expires_en = models.CharField(
-        max_length=100,
-        verbose_name='Таблица - срок ключа (en)',
-        null=True,
-        default='Token expires'
-    )
+    table_cells_total = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Всего')
 
-    table_status = models.CharField(
-        max_length=100,
-        verbose_name='Таблица - статус (ru)',
-        null=True,
-        default='Статус'
-    )
+    table_cells_free = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Свободных')
 
-    table_status_en = models.CharField(
-        max_length=100,
-        verbose_name='Таблица - статус (en)',
-        null=True,
-        default='Status'
-    )
+    table_cells_busy = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Занятых')
 
-    table_datetime = models.CharField(
-        max_length=100,
-        verbose_name='Таблица - дата установки (ru)',
-        null=True,
-        default='Дата установки'
-    )
+    table_cells_reserve = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Резерв')
 
-    table_datetime_en = models.CharField(
-        max_length=100,
-        verbose_name='Таблица - дата установки (en)',
-        null=True,
-        default='Datetime'
-    )
+    table_cells_blocked = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Блокировка')
 
-    table_cells_count = models.CharField(
-        max_length=100,
-        verbose_name='Таблица - количество ячеек (ru)',
-        null=True,
-        default='Кол-во ячеек'
-    )
+    filter_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фильтр')
 
-    table_cells_count_en = models.CharField(
-        max_length=100,
-        verbose_name='Таблица - количество ячеек (en)',
-        null=True,
-        default='Cells count'
-    )
+    filter_text_all = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Все')
+
+    card_token = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Ключ')
+
+    card_token_expires = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Срок истечения ключа')
+
+    card_status_date = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Дата установки статуса')
+
+    add_terminal_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Добавить терминал')
+
+    add_terminal_description = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Описание терминала')
+
+    add_terminal_address = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Адрес терминала')
+
+    add_terminal_map_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Указать на карте')
+
+    add_terminal_send_request = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отправить запрос на активацию после добавления')
+
+    add_terminal_save = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сохранить')
+
+    add_terminal_back = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Вернуться')
+
+    add_terminal_description_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Введите пожалуйста описание')
+
+    modal_add_success = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Терминал успешно добавлен!')
+
+    modal_delete = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Вы действительно хотите удалить терминал?')
+
+    modal_empty_addr = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пожалуйста укажите адрес терминала')
+
+    modal_edit_success = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Информация о терминале успешно изменена!')
+
+    modal_logs_success = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Логи успешно отправлены на почту!')
+
+    modal_send_activation = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отправить запрос на активацию?')
+
+    modal_cancel_activation = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отменить запрос на активацию?')
+
+    modal_block_confirm = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Вы уверены что хотите заблокировать терминал?')
+
+    modal_logs_email = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Введите адрес почтового ящика')
+
+    modal_open_cell = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Освободить ячейку после вскрытия?')
+
+    modal_open_cell_success = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Команда на вскрытие ячейки отправлена!')
+
+    modal_cell_params_empty = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Добавьте в справочник хотя бы один типоразмер')
+
+    action_delete = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Удалить')
+
+    action_send_request = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отправить запрос на активацию')
+
+    action_logs = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Скачать логи')
+
+    action_block = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заблокировать')
+
+    action_reject = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отменить активацию')
+
+    messages_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Журнал сообщений')
+
+    hide_show_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Свернуть/показать')
+
+    display_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отображать')
+
+    cells_number = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Номер')
+
+    cells_pseudonim = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Псевдоним')
+
+    cells_row = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Ряд')
+
+    cells_column = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Колонка')
+
+    cells_status = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Статус')
+
+    cells_date_status = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Дата установки')
+
+    cells_type = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Тип ячейки')
+
+    cells_parameters = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Параметры')
+
+    coordinates_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Координаты')
+
+    coordinates_not_found = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Координаты (не указаны)')
+
+    invalid_email = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный email')
 
     api_links = StreamField([
         ('api_block', ApiBlock())
@@ -1194,59 +3112,86 @@ class OwnerTerminalsPage(Page):
 
     content_panels = Page.content_panels + [
         MultiFieldPanel([
-            FieldRowPanel([
-                FieldPanel('page_header'),
-                FieldPanel('page_header_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('page_subheader'),
-                FieldPanel('page_subheader_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('list_tab'),
-                FieldPanel('list_tab_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('map_tab'),
-                FieldPanel('map_tab_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('add_terminal_button'),
-                FieldPanel('add_terminal_button_en')
-            ])
+            StreamFieldPanel('page_header'),
+            StreamFieldPanel('page_subheader'),
+            StreamFieldPanel('list_tab'),
+            StreamFieldPanel('map_tab'),
+            StreamFieldPanel('add_terminal_button'),
         ], heading='Заголовки'),
         FieldPanel('terminals_per_page'),
         FieldPanel('cells_per_page'),
         MultiFieldPanel([
-            FieldRowPanel([
-                FieldPanel('table_number'),
-                FieldPanel('table_number_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('table_status'),
-                FieldPanel('table_status_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('table_key'),
-                FieldPanel('table_key_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('table_key_expires'),
-                FieldPanel('table_key_expires_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('table_status'),
-                FieldPanel('table_status_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('table_datetime'),
-                FieldPanel('table_datetime_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('table_cells_count'),
-                FieldPanel('table_cells_count_en')
-            ])
+            StreamFieldPanel('table_number'),
+            StreamFieldPanel('table_address'),
+            StreamFieldPanel('table_status'),
+            StreamFieldPanel('table_key'),
+            StreamFieldPanel('table_key_expires'),
+            StreamFieldPanel('table_datetime'),
+            StreamFieldPanel('table_cells_count'),
+            StreamFieldPanel('table_cells_total'),
+            StreamFieldPanel('table_cells_free'),
+            StreamFieldPanel('table_cells_busy'),
+            StreamFieldPanel('table_cells_reserve'),
+            StreamFieldPanel('table_cells_blocked'),
         ], heading='Таблица'),
+        MultiFieldPanel([
+            StreamFieldPanel('card_token'),
+            StreamFieldPanel('card_token_expires'),
+            StreamFieldPanel('card_status_date'),
+            StreamFieldPanel('invalid_email'),
+        ], heading='Карточка терминала'),
+        MultiFieldPanel([
+            StreamFieldPanel('add_terminal_text'),
+            StreamFieldPanel('add_terminal_description'),
+            StreamFieldPanel('add_terminal_address'),
+            StreamFieldPanel('add_terminal_map_button'),
+            StreamFieldPanel('add_terminal_send_request'),
+            StreamFieldPanel('add_terminal_save'),
+            StreamFieldPanel('add_terminal_back'),
+            StreamFieldPanel('coordinates_text'),
+            StreamFieldPanel('coordinates_not_found'),
+            StreamFieldPanel('add_terminal_description_error'),
+        ], heading='Добавление терминала'),
+        MultiFieldPanel([
+            StreamFieldPanel('action_delete'),
+            StreamFieldPanel('action_send_request'),
+            StreamFieldPanel('action_logs'),
+            StreamFieldPanel('action_block'),
+            StreamFieldPanel('action_reject'),
+        ], heading='Действия'),
+        MultiFieldPanel([
+            StreamFieldPanel('messages_text'),
+            StreamFieldPanel('hide_show_text'),
+            StreamFieldPanel('display_text'),
+        ], heading='Журнал сообщений'),
+        MultiFieldPanel([
+            StreamFieldPanel('cells_number'),
+            StreamFieldPanel('cells_pseudonim'),
+            StreamFieldPanel('cells_row'),
+            StreamFieldPanel('cells_column'),
+            StreamFieldPanel('cells_status'),
+            StreamFieldPanel('cells_date_status'),
+            StreamFieldPanel('cells_type'),
+            StreamFieldPanel('cells_parameters'),
+        ], heading='Таблица ячеек'),
+        MultiFieldPanel([
+            StreamFieldPanel('modal_add_success'),
+            StreamFieldPanel('modal_delete'),
+            StreamFieldPanel('modal_edit_success'),
+            StreamFieldPanel('modal_logs_success'),
+            StreamFieldPanel('modal_send_activation'),
+            StreamFieldPanel('modal_cancel_activation'),
+            StreamFieldPanel('modal_block_confirm'),
+            StreamFieldPanel('modal_logs_email'),
+            StreamFieldPanel('modal_open_cell'),
+            StreamFieldPanel('modal_open_cell_success'),
+            StreamFieldPanel('modal_empty_addr'),
+            StreamFieldPanel('modal_cell_params_empty'),
+        ], heading='Модальные окна'),
+        MultiFieldPanel([
+            StreamFieldPanel('filter_text'),
+            StreamFieldPanel('filter_text_all')
+        ], heading='Фильтр'),
         StreamFieldPanel('api_links'),
     ]
 
@@ -1258,18 +3203,94 @@ class OwnerTerminalsPage(Page):
 class RegistrationPage(Page):
     max_count = 1
 
-    page_header = models.CharField(
-        max_length=100,
-        verbose_name='Заголовок на странице',
-        null=True,
-        default='Регистрация пользователя'
-    )
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
+
+    field_name = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Имя')
+
+    field_surname = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Фамилия')
+
+    field_password = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пароль')
+
+    field_repeat_password = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Повторить пароль')
+
+    sign_up_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Кнопка регистрации')
+
+    invalid_email_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный email')
+
+    invalid_name_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверное имя')
+
+    invalid_surname_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверная фамилия')
+
+    invalid_password_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный пароль')
+
+    invalid_reset_password_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный пароль (повторный)')
+
+    invalid_password_len_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный пароль (короткий)')
+
+    invalid_password_mismatch_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пароли не совпадают')
+
+    modal_email_sent = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Письмо отправлено')
+
+    modal_user_exists = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пользователь уже существует')
+
     api_links = StreamField([
         ('api_block', ApiBlock())
     ], null=True)
 
     content_panels = Page.content_panels + [
-        FieldPanel('page_header'),
+        MultiFieldPanel([
+            StreamFieldPanel('page_header'),
+        ], heading='Заголовок'),
+        MultiFieldPanel([
+            StreamFieldPanel('field_name'),
+            StreamFieldPanel('field_surname'),
+            StreamFieldPanel('field_password'),
+            StreamFieldPanel('field_repeat_password'),
+            StreamFieldPanel('sign_up_button'),
+        ], heading='Надписи над полями'),
+        MultiFieldPanel([
+            StreamFieldPanel('invalid_email_error'),
+            StreamFieldPanel('invalid_name_error'),
+            StreamFieldPanel('invalid_surname_error'),
+            StreamFieldPanel('invalid_password_error'),
+            StreamFieldPanel('invalid_reset_password_error'),
+            StreamFieldPanel('invalid_password_len_error'),
+            StreamFieldPanel('invalid_password_mismatch_error'),
+        ], heading='Ошибки валидации'),
+        MultiFieldPanel([
+            StreamFieldPanel('modal_email_sent'),
+            StreamFieldPanel('modal_user_exists')
+        ], heading='Модальные окна'),
         StreamFieldPanel('api_links'),
     ]
 
@@ -1279,10 +3300,10 @@ class RegistrationPage(Page):
 
 
 class PasswordResetEmail(Page):
-    template = 'akh_app/auth/reset_password_mail.html'
     max_count = 1
 
-    email_message = RichTextField()
+    email_message = RichTextField(
+        help_text='Для вставки ссылки используйте слово заключенное в символы "|": ... |ссылке|')
 
     content_panels = Page.content_panels + [
         FieldPanel('email_message')
@@ -1293,23 +3314,69 @@ class PasswordResetEmail(Page):
         verbose_name_plural = 'Шаблон письма для восстановления пароля'
 
 
+class AccountActivationPage(Page):
+    max_count = 1
+
+    email_message = RichTextField(
+        help_text='Для вставки ссылки используйте слово заключенное в символы "|": ... |ссылке|')
+
+    content_panels = Page.content_panels + [
+        FieldPanel('email_message')
+    ]
+
+    class Meta:
+        verbose_name = 'Шаблон письма для активации аккаунта'
+        verbose_name_plural = 'Шаблон письма для активации аккаунта'
+
+
 class PasswordReset(Page):
     templates = 'akh_app/password_reset.html'
     max_count = 1
 
-    page_header = models.CharField(
-        max_length=100,
-        verbose_name='Заголовок страницы',
-        null=True,
-        help_text='Данный заголовок будет отображаться сверху на вкладке страницы.'
-    )
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
+
+    invalid_email_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный email')
+
+    restore_button_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Кнопка восстановить')
+
+    back_to_login = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Кнопка вернуться')
+
+    modal_user_notfound = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пользователь не найден')
+
+    modal_success = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Письмо успешно отправлено')
+
     api_links = StreamField([
         ('api_block', ApiBlock())
     ], null=True)
 
     content_panels = Page.content_panels + [
-        FieldPanel('page_header'),
-        StreamFieldPanel('api_links'),
+        MultiFieldPanel([
+            StreamFieldPanel('page_header'),
+        ], heading='Заголовок'),
+        MultiFieldPanel([
+            StreamFieldPanel('invalid_email_error'),
+        ], heading='Ошибки валидации'),
+        MultiFieldPanel([
+            StreamFieldPanel('restore_button_text'),
+            StreamFieldPanel('back_to_login'),
+        ], heading='Кнопки'),
+        MultiFieldPanel([
+            StreamFieldPanel('modal_user_notfound'),
+            StreamFieldPanel('modal_success')
+        ], heading='Модальные окна'),
+        StreamFieldPanel('api_links')
     ]
 
     class Meta:
@@ -1317,3 +3384,72 @@ class PasswordReset(Page):
         verbose_name_plural = 'Страницы восстановления пароля'
 
 
+class ChangePassword(Page):
+    max_count = 1
+
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
+
+    password_field = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Новый пароль')
+
+    repeat_password_field = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Повторите пароль')
+
+    invalid_password_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный пароль')
+
+    invalid_password_len_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный пароль (слишком короткий')
+
+    invalid_reset_password_error = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Неверный пароль (повторить')
+
+    invalid_passwords_mismatch = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пароли не совпадают)')
+
+    change_button_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Кнопка сменить')
+
+    modal_success = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Пароль успешно изменен')
+
+    api_links = StreamField([
+        ('api_block', ApiBlock())
+    ], null=True)
+
+    content_panels = Page.content_panels + [
+        MultiFieldPanel([
+            StreamFieldPanel('page_header'),
+        ], heading='Заголовок'),
+        MultiFieldPanel([
+            StreamFieldPanel('password_field'),
+            StreamFieldPanel('repeat_password_field')
+        ], heading='Поля'),
+        MultiFieldPanel([
+            StreamFieldPanel('invalid_password_error'),
+            StreamFieldPanel('invalid_password_len_error'),
+            StreamFieldPanel('invalid_reset_password_error'),
+            StreamFieldPanel('invalid_passwords_mismatch'),
+        ], heading='Ошибки валидации'),
+        MultiFieldPanel([
+            StreamFieldPanel('change_button_text')
+        ], heading='Кнопки'),
+        MultiFieldPanel([
+            StreamFieldPanel('modal_success')
+        ], heading='Модальные окна'),
+        StreamFieldPanel('api_links')
+    ]
+
+    class Meta:
+        verbose_name = 'Страница смены пароля'
+        verbose_name_plural = 'Страницы смены пароля'

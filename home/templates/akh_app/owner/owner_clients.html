@@ -1,0 +1,19 @@
+{% extends 'home/home_page.html' %}
+{% load static %}
+
+{% block title %}{{ page.title }}{% endblock title %}
+
+{% block content %}
+
+    <div id="root"></div>
+
+    <script>
+        var menus = {{ menus|safe }};
+        var apiPath = "{{ api_path }}";
+        var languageId = {{ language_id }};
+        var pageContent = {{ page_content|safe }};
+        var portal_token = "{{ portal_token }}";
+        var itemsPerPage = "{{ page.clients_per_page }}";
+    </script>
+
+{% endblock content %}

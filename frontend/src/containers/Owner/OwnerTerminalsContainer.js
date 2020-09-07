@@ -5,13 +5,20 @@ import API from "../../services/api";
 import OwnerAddTerminal from "../../components/Terminals/OwnerAddTerminal";
 import OwnerTerminalDetailed from "../../components/Terminals/TerminalsList/OwnerTerminalDetailed";
 import ModalWindow from "../../components/ModalWindow";
+import Title from "../../controls/Title";
+import ButtonTopRight from "../../controls/ButtonTopRight";
+import Tab from "../../controls/Tab";
+import TerminalsFilter from "../../components/Terminals/TerminalsList/TerminalsFilter";
+import FilterTitle from "../../controls/FilterTitle";
 
 
 class OwnerTerminalsContainer extends Component {
     constructor() {
         super()
+        let currentLanguage = localStorage.getItem('lang_id') ? localStorage.getItem('lang_id') : 1;
         this.state = {
             containerIndex: 0,
+            currentLanguage: currentLanguage,
             allowedTerminalStatuses: [],
             isTerminalAdd: false,
             terminalDetailed: false,
@@ -36,17 +43,17 @@ class OwnerTerminalsContainer extends Component {
             })
     }
 
-    changeTab(containerIndex) {
+    changeTab = (containerIndex) => {
         this.setState({
             containerIndex: containerIndex
         })
-    }
+    };
 
     setInitialTerminalsList = (list) => {
         this.setState({
             terminalsList: list
         })
-    }
+    };
 
     filterTerminalsByStatus = (event) => {
         let statusToFilter = event.target.options[event.target.selectedIndex].id;
@@ -62,16 +69,16 @@ class OwnerTerminalsContainer extends Component {
         }
 
         this.child.updateTerminalsList(filteredList)
-    }
+    };
 
     setTerminalDetailed = (state, terminalToView) => {
         this.setState({
             terminalDetailed: state,
             terminalToView: terminalToView
         })
-    }
+    };
 
-    switchAddTerminalPage() {
+    switchAddTerminalPage = () => {
         API.get('getCellParameters')
             .then(response => {
                 let params = response.data.data;
@@ -81,7 +88,7 @@ class OwnerTerminalsContainer extends Component {
                     this.setState({isTerminalAdd: true})
                 }
             })
-    }
+    };
 
     render() {
         if (this.state.isTerminalAdd) {
@@ -94,6 +101,7 @@ class OwnerTerminalsContainer extends Component {
             return (
                 <React.Fragment>
                     <OwnerTerminalDetailed
+                        currentLanguage={this.state.currentLanguage}
                         terminal={this.state.terminalToView}
                     />
                 </React.Fragment>
@@ -104,69 +112,58 @@ class OwnerTerminalsContainer extends Component {
                     <div className="container">
                         <div className="top">
                             <div className="top__left">
-                                <div className="caption">
-                                    {window.pageHeader}
-                                </div>
-                                <div className="description">
-                                    {window.pageSubHeader}
-                                </div>
+                                <Title titleText={window.pageContent['page_header'][this.state.currentLanguage]} titleStyles='caption'/>
+                                <Title titleText={window.pageContent['page_subheader'][this.state.currentLanguage]} titleStyles='description'/>
                             </div>
-                            <div className="top__right">
-                                <a href="" onClick={e => {
-                                    e.preventDefault();
-                                    this.switchAddTerminalPage()
-                                }} className="button">{window.addTerminalButton}</a>
-                            </div>
+
+                            <ButtonTopRight
+                                handleClick={this.switchAddTerminalPage}
+                                buttonText={window.pageContent['add_terminal_button'][this.state.currentLanguage]}
+                            />
+
                         </div>
                         <div className="top-group-btns">
                             <div className="tabsBtn">
-                                <button onClick={e => {
-                                    e.stopPropagation();
-                                    this.changeTab(0)
-                                }}
-                                        className={`tabsBtn__btn ${this.state.containerIndex ? "" : "tabsBtn__btn-active"}`}>{window.listTab}
-                                </button>
-                                <button onClick={e => {
-                                    e.stopPropagation();
-                                    this.changeTab(1)
-                                }}
-                                        className={`tabsBtn__btn ${this.state.containerIndex ? "tabsBtn__btn-active" : ""}`}>{window.mapTab}
-                                </button>
+                                <Tab
+                                    handleClick={this.changeTab}
+                                    index={0}
+                                    containerIndex={this.state.containerIndex}
+                                    tabText={window.pageContent['list_tab'][this.state.currentLanguage]}
+                                    className={`tabsBtn__btn ${this.state.containerIndex ? "" : "tabsBtn__btn-active"}`}
+                                />
+                                <Tab
+                                    handleClick={this.changeTab}
+                                    index={1}
+                                    containerIndex={this.state.containerIndex}
+                                    tabText={window.pageContent['map_tab'][this.state.currentLanguage]}
+                                    className={`tabsBtn__btn ${this.state.containerIndex ? "tabsBtn__btn-active" : ""}`}
+                                />
                             </div>
                             <form>
                                 <div className="form__input">
-                                    <div className="label-input">
-                                        Фильтр
-                                    </div>
-                                    <div className="select">
-                                        <select onChange={this.filterTerminalsByStatus}>
-                                            {this.state.allowedTerminalStatuses.map((status, index) =>
-                                                (index === 0)
-                                                    ?
-                                                    <React.Fragment>
-                                                        <option id="all" defaultChecked={true} key="all">Все</option>
-                                                        <option id={status.id} key={status.id}>{status.name}</option>
-                                                    </React.Fragment>
-                                                    :
-                                                    (status.id !== 305) ?
-                                                    <option id={status.id} key={status.id}>{status.name}</option> : null
-                                            )}
-                                        </select>
-                                    </div>
+                                    <FilterTitle titleText={window.pageContent['filter_text'][this.state.currentLanguage]}/>
+                                    <TerminalsFilter
+                                        handleChange={this.filterTerminalsByStatus}
+                                        statuses={this.state.allowedTerminalStatuses}
+                                        filterAllText={window.pageContent['filter_text_all'][this.state.currentLanguage]}
+                                    />
                                 </div>
                             </form>
                         </div>
 
-                        <ModalWindow textTitle="Добавьте в справочник хотя бы один типоразмер." value="Ok"
-                                     showModal={this.state.showWarningModal}
-                                     onClose={(e) => {
-                                         this.setState({showWarningModal: false})
-                                     }}
+                        <ModalWindow
+                            textTitle={window.pageContent['modal_cell_params_empty'][this.state.currentLanguage]}
+                            value="Ok"
+                            showModal={this.state.showWarningModal}
+                            onClose={(e) => {
+                                this.setState({showWarningModal: false})
+                            }}
                         />
 
                         {this.state.containerIndex
                             ?
                             <OwnerTerminalsMap
+                                currentLanguage={this.state.currentLanguage}
                                 setListHandler={this.setInitialTerminalsList}
                                 ref={instance => {
                                     this.child = instance;
@@ -174,6 +171,7 @@ class OwnerTerminalsContainer extends Component {
                             />
                             :
                             <OwnerTerminalsList
+                                currentLanguage={this.state.currentLanguage}
                                 terminalDetailedHandler={this.setTerminalDetailed}
                                 setListHandler={this.setInitialTerminalsList}
                                 ref={instance => {

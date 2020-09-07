@@ -21,7 +21,8 @@ class AdminTerminalsList extends Component {
             countPages: 0,
             leftBound: 0,
             rightBound: 0,
-            currentDate: ""
+            currentDate: "",
+            colors: window.statusColors
         }
     }
 
@@ -135,20 +136,21 @@ class AdminTerminalsList extends Component {
             <React.Fragment>
                 <div className="table-wrap">
                     <table>
+                        <tbody>
                         <tr>
-                            <th>Номер</th>
-                            <th>Название группы</th>
-                            <th>Адрес</th>
-                            <th>Конфигурация</th>
-                            <th>Ключ</th>
-                            <th>Окончание ключа</th>
-                            <th>Статус</th>
+                            <th>{window.pageContent['table_number'][this.props.currentLanguage]}</th>
+                            <th>{window.pageContent['table_name'][this.props.currentLanguage]}</th>
+                            <th>{window.pageContent['table_address'][this.props.currentLanguage]}</th>
+                            <th>{window.pageContent['table_config'][this.props.currentLanguage]}</th>
+                            <th>{window.pageContent['table_key'][this.props.currentLanguage]}</th>
+                            <th>{window.pageContent['table_key_expires'][this.props.currentLanguage]}</th>
+                            <th>{window.pageContent['table_status'][this.props.currentLanguage]}</th>
                             <th></th>
                         </tr>
 
                         {terminalsListSliced.map((terminal, ind) =>
                             <tr key={terminal.id}>
-                                <td>№{terminal.number}</td>
+                                <td>{terminal.number}</td>
                                 <td>{terminal.terminalGroupName}</td>
                                 <td>
                                     {terminal.address}
@@ -172,8 +174,10 @@ class AdminTerminalsList extends Component {
                                 }
                                 <td>
                                     <div className="radio-wrap">
-                                        {this.state.terminalStatuses.map((tStatus) =>
-                                            tStatus.id === terminal.statusId ? tStatus.name : null
+                                        {this.state.terminalStatuses.map((status, status_index) =>
+                                            status.id === terminal.statusId ?
+                                                <span key={status_index} className="status"
+                                                      style={{'color': this.state.colors[terminal.statusId]}}>{status.name}</span> : null
                                         )}
                                     </div>
                                 </td>
@@ -189,6 +193,7 @@ class AdminTerminalsList extends Component {
                                 </td>
                             </tr>
                         )}
+                        </tbody>
                     </table>
                 </div>
 
@@ -197,6 +202,7 @@ class AdminTerminalsList extends Component {
                 {this.state.activationModal
                     ?
                     <AdminTerminalsModal
+                        currentLanguage={this.props.currentLanguage}
                         rejectChanging={this.rejectChangeTerminalStatus}
                         terminal={this.state.editingTerminal}
                         activationDate={this.state.currentDate}

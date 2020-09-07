@@ -6,13 +6,15 @@ import WaitingTerminalsCount from "../../components/Terminals/TerminalWidgets/Wa
 import ExpiredTerminalsCount from "../../components/Terminals/TerminalWidgets/ExpiredTerminalsCount";
 import TerminalGroupsCount from "../../components/Terminals/TerminalWidgets/TerminalGroupsCount";
 import {LOGIN_PATH} from "../../ContantUrls";
+import logoutFromSuperAdmin from "../../components/Account/LogoutFromContext";
 
 
 class MainAdminContainer extends Component {
     constructor() {
         super()
-
+        let currentLanguage = localStorage.getItem('lang_id') ? localStorage.getItem('lang_id') : 1;
         this.state = {
+            currentLanguage: currentLanguage,
             terminalGroupsCount: 0,
             terminalsCount: 0,
             onlineTerminalsCount: 0,
@@ -22,22 +24,26 @@ class MainAdminContainer extends Component {
     }
 
     componentDidMount() {
+        if (localStorage.getItem('context_id')) {
+            logoutFromSuperAdmin();
+        }
+
         API.get("cabinetInfo")
-            .then(response => response.json())
             .then(result => {
-                if (result.errorCode === 4) {
+                if (result.data.errorCode === 4) {
                     API.post("logout")
                         .then(result => {
                             localStorage.removeItem('token');
                             window.location = LOGIN_PATH;
                         })
                 } else {
+                    console.log(result);
                     this.setState({
-                        terminalGroupsCount: result.data[0].value,
-                        terminalsCount: result.data[1].value,
-                        onlineTerminalsCount: result.data[2].value,
-                        waitForActivationTerminalsCount: result.data[3].value,
-                        expiredTokenTerminalsCount: result.data[4].value
+                        terminalGroupsCount: result.data.data[0].value,
+                        terminalsCount: result.data.data[1].value,
+                        onlineTerminalsCount: result.data.data[2].value,
+                        waitForActivationTerminalsCount: result.data.data[3].value,
+                        expiredTokenTerminalsCount: result.data.data[4].value
                     })
                 }
             })
@@ -50,7 +56,7 @@ class MainAdminContainer extends Component {
             <div className="content">
                 <div className="container">
                     <div className="caption">
-                        Общая информация
+                        {window.pageContent['page_header'][this.state.currentLanguage]}
                     </div>
 
                     <div className="main">
@@ -58,31 +64,31 @@ class MainAdminContainer extends Component {
 
                             <TerminalGroupsCount
                                 icon={window.totalTerminalsGroupsIcon}
-                                text={window.totalTerminalsGroupsText}
+                                text={window.pageContent['total_terminals_groups_text'][this.state.currentLanguage]}
                                 count={this.state.terminalGroupsCount}
                             />
 
                             <TerminalsCount
                                 icon={window.totalTerminalsIcon}
-                                text={window.totalTerminalsText}
+                                text={window.pageContent['total_terminals_text'][this.state.currentLanguage]}
                                 count={this.state.terminalsCount}
                             />
 
                             <OnlineTerminalsCount
                                 icon={window.onlineTerminalsIcon}
-                                text={window.onlineTerminalsText}
+                                text={window.pageContent['online_terminals_text'][this.state.currentLanguage]}
                                 count={this.state.onlineTerminalsCount}
                             />
 
                             <WaitingTerminalsCount
                                 icon={window.pendingTerminalsIcon}
-                                text={window.pendingTerminalsText}
+                                text={window.pageContent['pending_terminals_text'][this.state.currentLanguage]}
                                 count={this.state.waitForActivationTerminalsCount}
                             />
 
                             <ExpiredTerminalsCount
                                 icon={window.expiredTerminalsIcon}
-                                text={window.expiredTerminalsText}
+                                text={window.pageContent['expired_terminals_text'][this.state.currentLanguage]}
                                 count={this.state.expiredTokenTerminalsCount}
                             />
 

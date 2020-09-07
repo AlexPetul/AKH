@@ -3,10 +3,11 @@ import axios from 'axios';
 
 const API = axios.create({
     baseURL: window.apiPath,
-    headers: new Headers({'Content-Type': 'application/json'})
+    headers: new Headers({
+        'Content-Type': 'application/json',
+    })
 });
 
-//Перехватчик при отправке каждого запроса выполняет функциию
 
 API.interceptors.request.use(config => {
     let token = localStorage.getItem('token');
@@ -17,6 +18,7 @@ API.interceptors.request.use(config => {
     if (contextId) {
         config.headers.contextId = contextId
     }
+    config.headers.languageId = window.languageId;
     return config;
 });
 

@@ -8,8 +8,10 @@ import ConfigurationItem from "../../components/ChosingConfiguration/Configurati
 class ChoosingConfigurationContainer extends Component {
     constructor() {
         super();
+        let currentLanguage = localStorage.getItem('lang_id') ? localStorage.getItem('lang_id') : 1;
         this.state = {
             showLoader: false,
+            currentLanguage: currentLanguage,
             configurations: [],
             configIcons: window.configIcons,
         }
@@ -41,7 +43,7 @@ class ChoosingConfigurationContainer extends Component {
 
         API.post(window.apiLinks[0].short_name, {id: terminalGroupId, configurationId: configId})
             .then(response => {
-                localStorage.setItem('config_chosen', '1');
+                localStorage.setItem('config_id', configId);
                 fetch('/save-configuration/', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -58,14 +60,16 @@ class ChoosingConfigurationContainer extends Component {
             <div className="content">
                 <div className="container">
                     <div className="caption">
-                        {window.page_header}
+                        {window.pageContent['page_header'][this.state.currentLanguage]}
                     </div>
                     <div className="selectCongig">
-                        {this.state.configurations.map((config) =>
+                        {this.state.configurations.map((config, index) =>
                             <ConfigurationItem
+                                key={index}
                                 icon={this.state.configIcons[config.id]}
                                 config={config}
                                 chooseConfig={this.chooseConfigAKH}
+                                currentLanguage={this.state.currentLanguage}
                             />
                         )}
                     </div>

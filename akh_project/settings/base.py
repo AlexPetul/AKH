@@ -159,7 +159,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, "frontend/static")
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'frontend/static_in_dev')]
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'frontend/static_in_dev/img')
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'frontend/static_in_dev/img')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Wagtail settings
 

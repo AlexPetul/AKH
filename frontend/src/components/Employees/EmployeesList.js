@@ -4,12 +4,16 @@ import DeleteEmployeeModal from "./DeleteEmployeeModal";
 import EmployeePagination from "./EmployeePagination";
 import ButtonIcon from "../../controls/ButtonIcon";
 import Loader from "../../controls/Loader";
+import Title from "../../controls/Title";
+import {OWNER_EMPLOYEES} from "../../ContantUrls";
 
 
 class EmployeesList extends Component {
     constructor() {
         super()
+        let currentLanguage = localStorage.getItem('lang_id') ? localStorage.getItem('lang_id') : 1;
         this.state = {
+            currentLanguage: currentLanguage,
             employeesList: [],
             showLoader: false,
             deleteModal: false,
@@ -76,7 +80,7 @@ class EmployeesList extends Component {
 
     rejectDelete = event => {
         this.setState({deleteModal: false})
-    }
+    };
 
     confirmDeleteEmployee = event => {
         let employeeId = this.state.deletingEmployee.id
@@ -87,15 +91,13 @@ class EmployeesList extends Component {
             statusComment: ""
         })
             .then(response => {
-                let selectControl = document.getElementsByClassName("employee-row-" + employeeId);
-                selectControl[0].outerHTML = "";
                 this.setState({
                     deleteModal: false,
                     deletingEmployee: null
-                })
-                console.log(response)
+                });
+                window.location = OWNER_EMPLOYEES;
             })
-    }
+    };
 
     render() {
         const employeeListSliced = this.state.employeesList.slice(
@@ -107,34 +109,31 @@ class EmployeesList extends Component {
                 <div className="container">
                     <div className="top">
                         <div className="top__left">
-                            <div className="caption">
-                                {window.pageHeader}
-                            </div>
-                            <div className="description">
-                                {window.pageSubHeader}
-                            </div>
+                            <Title titleText={window.pageContent['page_header'][this.state.currentLanguage]} titleStyles='caption'/>
+                            <Title titleText={window.pageContent['page_subheader'][this.state.currentLanguage]} titleStyles='description'/>
                         </div>
                         {window.isAdmin
                             ?
                             null
                             :
                             <div className="top__right">
-                                <a href="#" onClick={e => {
+                                <a href="" onClick={e => {
                                     e.preventDefault();
                                     this.props.handleChange(1)
-                                }} className="button">{window.addEmployeeButton}</a>
+                                }} className="button">{window.pageContent['add_button_name'][this.state.currentLanguage]}</a>
                             </div>
                         }
                     </div>
                     <div className="table-wrap">
                         <table>
+                            <tbody>
                             <tr>
-                                <th>{window.tableSurname}</th>
-                                <th>{window.tableName}</th>
-                                <th>{window.tablePatronymic}</th>
+                                <th>{window.pageContent['table_surname'][this.state.currentLanguage]}</th>
+                                <th>{window.pageContent['table_name'][this.state.currentLanguage]}</th>
+                                <th>{window.pageContent['table_patronymic'][this.state.currentLanguage]}</th>
                                 <th>Email</th>
-                                <th>{window.tablePhone}</th>
-                                <th>{window.tableStatus}</th>
+                                <th>{window.pageContent['table_phone'][this.state.currentLanguage]}</th>
+                                <th>{window.pageContent['table_status'][this.state.currentLanguage]}</th>
                                 {window.isAdmin ? null : <th></th>}
                             </tr>
                             {employeeListSliced.map((employee, index) =>
@@ -242,6 +241,7 @@ class EmployeesList extends Component {
                                         :
                                         null
                             )}
+                            </tbody>
                         </table>
                     </div>
 
@@ -265,6 +265,7 @@ class EmployeesList extends Component {
                 {this.state.deleteModal
                     ?
                     <DeleteEmployeeModal
+                        currentLanguage={this.state.currentLanguage}
                         confirmDelete={this.confirmDeleteEmployee}
                         rejectDelete={this.rejectDelete}
                         user={this.state.deletingEmployee}/>

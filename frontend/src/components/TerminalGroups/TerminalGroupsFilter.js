@@ -27,13 +27,14 @@ class TerminalGroupsFilter extends Component {
                     <form>
                         <div className="form__input">
                             <div className="label-input">
-                                Фильтр по названию групп
+                                {window.pageContent['filter_text'][this.props.currentLanguage]}
                             </div>
                             <input
                                 type="text"
                                 onChange={this.searchQuery}
                                 className="input input_mini"
-                                placeholder="Введите название"/>
+                                placeholder={window.languageId === 1 ? "Введите название" : "Input name"}
+                            />
                         </div>
                     </form>
                 </div>

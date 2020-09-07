@@ -11,15 +11,13 @@
         var menus = {{ menus|safe }};
         var apiPath = "{{ api_path }}";
         var languageId = {{ language_id }};
-        var pageHeader = "{{ page.page_header }}";
-        var employeesPerPage = {{ page.employees_per_page }}
+        var pageContent = {{ page_content|safe }};
+        var employeesPerPage = {{ page.employees_per_page }};
         var apiLinks = {{ api_links|safe }};
-        var portal_token = "{{ portal_token }}"
+        var portal_token = "{{ portal_token }}";
 
-        var isAdmin = {{ is_admin }}
-        var isSuperAdmin = {{ is_superadmin }}
+        var isAdmin = {{ is_admin }};
+        var isSuperAdmin = {{ is_superadmin }};
     </script>
-
-    <script src="{% static 'js/main.js' %}"></script>
 
 {% endblock content %}

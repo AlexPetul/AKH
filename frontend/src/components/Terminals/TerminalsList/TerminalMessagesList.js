@@ -86,16 +86,16 @@ class TerminalMessagesList extends Component {
                 <div className="wrap-accordeon">
                     <div className="accordeon">
                         <div className="accordeon__header">
-                            <div className="caption">Журнал сообщений</div>
+                            <div className="caption">{window.pageContent['messages_text'][this.props.currentLanguage]}</div>
                             <span className="accordeon__btn" onClick={e => {
                                 this.collapseMessages()
-                            }}>Свернуть/Показать</span>
+                            }}>{window.pageContent['hide_show_text'][this.props.currentLanguage]}</span>
                         </div>
                         <div className="accordeon__body collapse-messages open">
                             <div className="listTerminals">
-                                <span className="listTerminals__text">Отображать:</span>
+                                <span className="listTerminals__text">{window.pageContent['display_text'][this.props.currentLanguage]}:</span>
                                 {this.state.messagesTypes.map((mesType, index) =>
-                                    <div className="form__input" style={{'margin-top': '0px'}}>
+                                    <div key={index} className="form__input" style={{'marginTop': '0px'}}>
                                         <div className="check check_nowrap">
                                             <label>
                                                 <input value={mesType.name} onChange={e => {
@@ -115,14 +115,18 @@ class TerminalMessagesList extends Component {
 
                             <div className="table-wrap">
                                 <table>
-                                    {this.props.terminal.messages.map((message, ind) =>
-                                        this.state.filterIds.includes(message.messageTypeId) ?
-                                            <TerminalMessage
-                                                message={message}
-                                                index={ind}
-                                                terminal={this.props.terminal}/>
-                                            : null
-                                    )}
+                                    <tbody>
+                                        {this.props.terminal.messages.map((message, ind) =>
+                                            this.state.filterIds.includes(message.messageTypeId) ?
+                                                <TerminalMessage
+                                                    displayNumber={false}
+                                                    key={ind}
+                                                    message={message}
+                                                    index={ind}
+                                                    terminal={this.props.terminal}/>
+                                                : null
+                                        )}
+                                    </tbody>
                                 </table>
                             </div>
                         </div>

@@ -1,8 +1,9 @@
 import React, {Component} from 'react'
 import API from "../../services/api";
-import {Rule, TypeOfRule, ValidationInput} from "../../helpers/ValidationHelper";
+import {Rule, TypeOfRule, ValidateState, ValidationInput} from "../../helpers/ValidationHelper";
 import DateInput from "../../controls/DateInput";
 import {ADMIN_TERMINALS} from "../../ContantUrls";
+import Input from "../../controls/Input";
 
 
 class AdminTerminalsModal extends Component {
@@ -11,7 +12,7 @@ class AdminTerminalsModal extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            activationDate: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста дату")],
+            activationDate: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['field_date_error'][this.props.currentLanguage])],
                 true, this.props.activationDate)
         }
     }
@@ -25,19 +26,23 @@ class AdminTerminalsModal extends Component {
     };
 
     activateTerminal(prolongActivation) {
-        let date = this.state.activationDate.value.split('.');
-        let tzDate = new Date(date[2], date[1] - 1, date[0], 12, 0, 0, 0).toLocaleString("en-US", {timeZone: "Europe/Moscow"});
-        let tzISODate = new Date(tzDate).toISOString();
+        let validationResult = ValidateState(this.state);
+        this.setState({...validationResult.state});
+        if (validationResult.isValid) {
+            let date = this.state.activationDate.value.split('.');
+            let tzDate = new Date(date[2], date[1] - 1, date[0], 12, 0, 0, 0).toLocaleString("en-US", {timeZone: "Europe/Moscow"});
+            let tzISODate = new Date(tzDate).toISOString();
 
-        let api = prolongActivation ? 'changeTerminalTokenExpires' : 'activateTerminal';
-        API.post(api, {
-            id: this.props.terminal.id,
-            expires: tzISODate
-        })
-            .then(response => {
-                console.log(response);
-                window.location = ADMIN_TERMINALS;
+            let api = prolongActivation ? 'changeTerminalTokenExpires' : 'activateTerminal';
+            API.post(api, {
+                id: this.props.terminal.id,
+                expires: tzISODate
             })
+                .then(response => {
+                    console.log(response);
+                    window.location = ADMIN_TERMINALS;
+                })
+        }
     }
 
     rejectActivation() {
@@ -62,9 +67,9 @@ class AdminTerminalsModal extends Component {
                             <div className="modal__caption">
                                 {this.props.terminal.statusId === 303
                                     ?
-                                    <div className="modal__title">Продление активации</div>
+                                    <div className="modal__title">{window.pageContent['modal_prolong_header'][this.props.currentLanguage]}</div>
                                     :
-                                    <div className="modal__title">Срок окончания активации</div>
+                                    <div className="modal__title">{window.pageContent['modal_activate_header'][this.props.currentLanguage]}</div>
                                 }
                             </div>
 
@@ -77,13 +82,15 @@ class AdminTerminalsModal extends Component {
                             <div className="form">
 
                                 <DateInput
-                                    label="Введите дату"
+                                    label={window.pageContent['field_date'][this.props.currentLanguage]}
                                     name="activationDate"
                                     value={activationDate.value}
                                     onChange={this.handleChange}
                                     id="datepicker"
                                     className={activationDate.isValid ? this.inputStyle : `${this.inputStyle} error`}
                                     isValid={activationDate.isValid}
+                                    validationMessageLength={activationDate.validationMessage.length}
+                                    validationMessageText={activationDate.validationMessage[0]}
                                 />
 
                                 <div className="form__submit">
@@ -95,12 +102,12 @@ class AdminTerminalsModal extends Component {
                                             :
                                             this.activateTerminal(0)
                                     }} className="button"
-                                           value={this.props.terminal.statusId === 303 ? "Продлить" : "Активировать"}/>
+                                           value={this.props.terminal.statusId === 303 ? window.pageContent['button_renew'][this.props.currentLanguage] : window.pageContent['button_activate'][this.props.currentLanguage]}/>
                                     <div className="cansel">
                                         <a href="" onClick={e => {
                                             e.preventDefault();
                                             this.props.rejectChanging()
-                                        }}>Отменить</a>
+                                        }}>{window.pageContent['button_cancel'][this.props.currentLanguage]}</a>
                                     </div>
                                 </div>
                                 <div className="form__submit">
@@ -108,7 +115,7 @@ class AdminTerminalsModal extends Component {
                                         e.preventDefault();
                                         this.rejectActivation()
                                     }}>
-                                        {this.props.terminal.statusId === 303 ? "Отозвать активацию" : "Отклонить запрос на активацию"}
+                                        {this.props.terminal.statusId === 303 ? window.pageContent['deactivate'][this.props.currentLanguage] : window.pageContent['cancel_activation'][this.props.currentLanguage]}
                                     </a>
                                 </div>
                             </div>

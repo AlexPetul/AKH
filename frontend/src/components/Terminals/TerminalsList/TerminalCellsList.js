@@ -82,14 +82,14 @@ class TerminalCellsList extends Component {
                 el.classList.remove("active-page");
             });
         }
-    }
+    };
 
     updateBounds = (newRightBound, newLeftBound) => {
         this.setState({
             rightBound: newRightBound,
             leftBound: newLeftBound
         })
-    }
+    };
 
     filterCellsByStatus = (event) => {
         let statusToFilter = event.target.options[event.target.selectedIndex].id
@@ -104,30 +104,30 @@ class TerminalCellsList extends Component {
             cellsList: filteredList,
             countPages: Math.ceil(filteredList.length / this.state.itemsPerPage)
         })
-    }
+    };
 
     openCell = (cell) => {
         this.setState({
             openCellModal: true,
             cellToOpen: cell
         })
-    }
+    };
 
     rejectDeleteRequest = () => {
         this.setState({setCellFree: false});
         this.sendCommandToCell()
-    }
+    };
 
     confirmRequest = (_) => {
         this.setState({setCellFree: true});
         this.sendCommandToCell()
-    }
+    };
 
     sendCommandToCell = (_) => {
         API.post('sendCommand', {
             terminalId: this.props.terminal.id,
             commandTypeId: 111,
-            parameters: {"cellId": this.state.cellToOpen.id, "setCellFree": String(this.state.setCellFree)}
+            parameters: {"cellNumber": this.state.cellToOpen.id, "setCellFree": String(this.state.setCellFree)}
         })
             .then(response => {
 
@@ -136,7 +136,7 @@ class TerminalCellsList extends Component {
                     successOpenCellModal: true
                 })
             })
-    }
+    };
 
     openModalChangeCellStatus = (cell) => {
         let action = (cell.statusId === 404) ? "разблокировать" : "заблокировать";
@@ -146,11 +146,11 @@ class TerminalCellsList extends Component {
             confirmationMessage: formattedMessage,
             cellToBlockUnblock: cell
         })
-    }
+    };
 
     rejectBlockUnblockCell = () => {
         this.setState({blockCellModal: false})
-    }
+    };
 
     blockUnblockCell = (_) => {
 
@@ -176,7 +176,7 @@ class TerminalCellsList extends Component {
                     <form>
                         <div className="form__input">
                             <div className="label-input">
-                                Фильтр
+                                {window.languageId === 1 ? "Фильтр" : "Filter"}
                             </div>
                             <div className="select">
                                 <select onChange={this.filterCellsByStatus}>
@@ -190,21 +190,22 @@ class TerminalCellsList extends Component {
                 </div>
                 <div className="table-wrap">
                     <table>
+                        <tbody>
                         <tr>
-                            <th>Номер</th>
-                            <th>Псевдоним</th>
-                            <th>Ряд</th>
-                            <th>Колонка</th>
-                            <th>Статус</th>
-                            <th>Дата установки</th>
-                            <th>Тип ячейки</th>
-                            <th>Параметры</th>
+                            <th>{window.pageContent['cells_number'][this.props.currentLanguage]}</th>
+                            <th>{window.pageContent['cells_pseudonim'][this.props.currentLanguage]}</th>
+                            <th>{window.pageContent['cells_row'][this.props.currentLanguage]}</th>
+                            <th>{window.pageContent['cells_column'][this.props.currentLanguage]}</th>
+                            <th>{window.pageContent['cells_status'][this.props.currentLanguage]}</th>
+                            <th>{window.pageContent['cells_date_status'][this.props.currentLanguage]}</th>
+                            <th>{window.pageContent['cells_type'][this.props.currentLanguage]}</th>
+                            <th>{window.pageContent['cells_parameters'][this.props.currentLanguage]}</th>
                             <th></th>
                         </tr>
                         {cellsListSliced.map((cell) =>
                             <tr key={cell.number}>
                                 <td>
-                                    <b>№{cell.number}</b>
+                                    <b>{cell.number}</b>
                                 </td>
                                 <td>
                                     <b>{cell.alias}</b>
@@ -245,12 +246,13 @@ class TerminalCellsList extends Component {
                                 </td>
                             </tr>
                         )}
+                        </tbody>
                     </table>
 
                     {this.state.openCellModal
                         ?
                         <ConfirmationModal
-                            textTitle="Освободить ячейку после вскрытия?"
+                            textTitle={window.pageContent['modal_open_cell'][this.props.currentLanguage]}
                             closeModal={this.closeModal}
                             showModal={this.state.openCellModal}
                             rejectRequest={this.rejectDeleteRequest}
@@ -261,11 +263,13 @@ class TerminalCellsList extends Component {
                         null
                     }
 
-                    <ModalWindow value="Ok" textTitle="Команда на вскрытие ячейки отправлена!"
-                                 showModal={this.state.successOpenCellModal}
-                                 onClose={(e) => {
-                                     this.setState({successOpenCellModal: false});
-                                 }}
+                    <ModalWindow
+                        value="Ok"
+                        textTitle={window.pageContent['modal_open_cell_success'][this.props.currentLanguage]}
+                        showModal={this.state.successOpenCellModal}
+                        onClose={(e) => {
+                            this.setState({successOpenCellModal: false});
+                        }}
                     />
 
                     {this.state.blockCellModal

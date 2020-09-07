@@ -2,8 +2,8 @@ from django.db import models
 
 from wagtail.core.models import Page
 from wagtail.core.fields import StreamField
-from akh_app.blocks import ApiBlock
-from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel, StreamFieldPanel, FieldRowPanel
+from akh_app.blocks import ApiBlock, MultiLangBlock
+from wagtail.admin.edit_handlers import MultiFieldPanel, StreamFieldPanel
 from wagtail.images.edit_handlers import ImageChooserPanel
 
 
@@ -11,47 +11,17 @@ class HomePage(Page):
     templates = "akh_app/index.html"
     max_count = 1
 
-    page_header = models.CharField(
-        max_length=200,
-        null=True,
-        verbose_name='Заголовок на странице (ru)',
-        default='Текущая конфигурация'
-    )
+    page_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заголовок')
 
-    page_header_en = models.CharField(
-        max_length=200,
-        null=True,
-        verbose_name='Заголовок на странице (en)',
-        default='Current configuration'
-    )
+    stat_tab = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Статистика')
 
-    stat_tab = models.CharField(
-        max_length=200,
-        null=True,
-        verbose_name='Статистика (ru)',
-        default='Статистика'
-    )
-
-    stat_tab_en = models.CharField(
-        max_length=200,
-        null=True,
-        verbose_name='Статистика (en)',
-        default='Statistics'
-    )
-
-    messages_tab = models.CharField(
-        max_length=200,
-        null=True,
-        verbose_name='Сообщения терминалов (ru)',
-        default='Сообщения терминалов'
-    )
-
-    messages_tab_en = models.CharField(
-        max_length=200,
-        null=True,
-        verbose_name='Сообщения терминалов (en)',
-        default='Terminal messages'
-    )
+    messages_tab = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сообщения терминалов')
 
     total_terminals_icon = models.ForeignKey(
         'wagtailimages.Image',
@@ -61,21 +31,9 @@ class HomePage(Page):
         related_name='+'
     )
 
-    total_terminals_text = models.CharField(
-        max_length=400,
-        null=True,
-        blank=True,
-        verbose_name='Текст (ru)',
-        default='Всего терминалов'
-    )
-
-    total_terminals_text_en = models.CharField(
-        max_length=400,
-        null=True,
-        blank=True,
-        verbose_name='Текст (en)',
-        default='Total terminals'
-    )
+    total_terminals_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Всего терминалов')
 
     online_terminals_icon = models.ForeignKey(
         'wagtailimages.Image',
@@ -85,21 +43,9 @@ class HomePage(Page):
         related_name='+'
     )
 
-    online_terminals_text = models.CharField(
-        max_length=400,
-        null=True,
-        blank=True,
-        verbose_name='Текст (ru)',
-        default='Количество терминалов онлайн'
-    )
-
-    online_terminals_text_en = models.CharField(
-        max_length=400,
-        null=True,
-        blank=True,
-        verbose_name='Текст (en)',
-        default='Online terminals count'
-    )
+    online_terminals_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Количество терминалов онлайн')
 
     expired_terminals_icon = models.ForeignKey(
         'wagtailimages.Image',
@@ -109,21 +55,9 @@ class HomePage(Page):
         related_name='+'
     )
 
-    expired_terminals_text = models.CharField(
-        max_length=400,
-        null=True,
-        blank=True,
-        verbose_name='Текст (ru)',
-        default='Просрочена активация'
-    )
-
-    expired_terminals_text_en = models.CharField(
-        max_length=400,
-        null=True,
-        blank=True,
-        verbose_name='Текст (en)',
-        default='Activation expired'
-    )
+    expired_terminals_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Просрочена активация')
 
     pending_terminals_icon = models.ForeignKey(
         'wagtailimages.Image',
@@ -133,21 +67,9 @@ class HomePage(Page):
         related_name='+'
     )
 
-    pending_terminals_text = models.CharField(
-        max_length=400,
-        null=True,
-        blank=True,
-        verbose_name='Текст (ru)',
-        default='В ожидании активации'
-    )
-
-    pending_terminals_text_en = models.CharField(
-        max_length=400,
-        null=True,
-        blank=True,
-        verbose_name='Текст (en)',
-        default='Waiting for activation'
-    )
+    pending_terminals_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='В ожидании активации')
 
     blocked_terminals_icon = models.ForeignKey(
         'wagtailimages.Image',
@@ -157,21 +79,9 @@ class HomePage(Page):
         related_name='+'
     )
 
-    blocked_terminals_text = models.CharField(
-        max_length=400,
-        null=True,
-        blank=True,
-        verbose_name='Текст (ru)',
-        default='Заблокированных терминалов'
-    )
-
-    blocked_terminals_text_en = models.CharField(
-        max_length=400,
-        null=True,
-        blank=True,
-        verbose_name='Текст (en)',
-        default='Blocked terminals'
-    )
+    blocked_terminals_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Заблокированных терминалов')
 
     active_terminals_icon = models.ForeignKey(
         'wagtailimages.Image',
@@ -181,53 +91,93 @@ class HomePage(Page):
         related_name='+'
     )
 
-    active_terminals_text = models.CharField(
-        max_length=400,
+    active_terminals_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Количество активных терминалов')
+
+    display_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Отображать')
+
+    change_config_button = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сменить')
+
+    currency_header = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Текущая валюта')
+
+    payments_icon = models.ForeignKey(
+        'wagtailimages.Image',
         null=True,
-        blank=True,
-        verbose_name='Текст (ru)',
-        default='Количество активных терминалов'
+        on_delete=models.SET_NULL,
+        verbose_name='Иконка',
+        related_name='+'
     )
 
-    active_terminals_text_en = models.CharField(
-        max_length=400,
+    payments_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Сумма платежей за сутки')
+
+    storage_icon = models.ForeignKey(
+        'wagtailimages.Image',
         null=True,
-        blank=True,
-        verbose_name='Текст (en)',
-        default='Active terminals count'
+        on_delete=models.SET_NULL,
+        verbose_name='Иконка',
+        related_name='+'
     )
 
-    display_text = models.CharField(
-        max_length=50,
+    storage_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Кол-во хранений за сутки')
+
+    collections_icon = models.ForeignKey(
+        'wagtailimages.Image',
         null=True,
-        blank=True,
-        verbose_name='Отображать (ru)',
-        default='Отображать'
+        on_delete=models.SET_NULL,
+        verbose_name='Иконка',
+        related_name='+'
     )
 
-    display_text_en = models.CharField(
-        max_length=50,
+    collections_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Кол-во инкассаций за сутки')
+
+    cell_attachments_icon = models.ForeignKey(
+        'wagtailimages.Image',
         null=True,
-        blank=True,
-        verbose_name='Отображать (en)',
-        default='Display'
+        on_delete=models.SET_NULL,
+        verbose_name='Иконка',
+        related_name='+'
     )
 
-    change_config_button = models.CharField(
-        max_length=50,
+    cell_attachments_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Кол-во доступов за сутки')
+
+    cash_icon = models.ForeignKey(
+        'wagtailimages.Image',
         null=True,
-        blank=True,
-        verbose_name='Сменить (ru)',
-        default='Сменить'
+        on_delete=models.SET_NULL,
+        verbose_name='Иконка',
+        related_name='+'
     )
 
-    change_config_button_en = models.CharField(
-        max_length=50,
+    cash_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Общая сумма наличных денег')
+
+    mark_icon = models.ForeignKey(
+        'wagtailimages.Image',
         null=True,
-        blank=True,
-        verbose_name='Сменить (en)',
-        default='Change'
+        on_delete=models.SET_NULL,
+        verbose_name='Иконка',
+        related_name='+'
     )
+
+    mark_text = StreamField([
+        ('lang_select', MultiLangBlock())
+    ], null=True, verbose_name='Количество закладок за сутки')
 
     api_links = StreamField([
         ('api_block', ApiBlock())
@@ -235,75 +185,68 @@ class HomePage(Page):
 
     content_panels = Page.content_panels + [
         MultiFieldPanel([
-            FieldPanel('page_header'),
-            FieldPanel('page_header_en')
-        ], heading='Заголовок'),
+            StreamFieldPanel('page_header'),
+            StreamFieldPanel('currency_header'),
+        ], heading='Заголовки'),
         MultiFieldPanel([
-            FieldRowPanel([
-                FieldPanel('stat_tab'),
-                FieldPanel('stat_tab_en')
-            ]),
-            FieldRowPanel([
-                FieldPanel('messages_tab'),
-                FieldPanel('messages_tab_en')
-            ]),
+            StreamFieldPanel('stat_tab'),
+            StreamFieldPanel('messages_tab'),
         ], heading='Вкладки'),
         MultiFieldPanel([
             ImageChooserPanel('total_terminals_icon'),
-            FieldRowPanel([
-                FieldPanel('total_terminals_text'),
-                FieldPanel('total_terminals_text_en')
-            ])
+            StreamFieldPanel('total_terminals_text')
         ], heading='Первый блок (Всего терминалов)'),
         MultiFieldPanel([
             ImageChooserPanel('online_terminals_icon'),
-            FieldRowPanel([
-                FieldPanel('online_terminals_text'),
-                FieldPanel('online_terminals_text_en')
-            ])
+            StreamFieldPanel('online_terminals_text'),
         ], heading='Второй блок (Терминалы онлайн)'),
         MultiFieldPanel([
             ImageChooserPanel('expired_terminals_icon'),
-            FieldRowPanel([
-                FieldPanel('expired_terminals_text'),
-                FieldPanel('expired_terminals_text_en')
-            ])
+            StreamFieldPanel('expired_terminals_text'),
         ], heading='Третий блок (Просрочена активация)'),
         MultiFieldPanel([
             ImageChooserPanel('pending_terminals_icon'),
-            FieldRowPanel([
-                FieldPanel('pending_terminals_text'),
-                FieldPanel('pending_terminals_text_en')
-            ])
+            StreamFieldPanel('pending_terminals_text')
         ], heading='Четвертый блок (В ожидании активации)'),
         MultiFieldPanel([
             ImageChooserPanel('blocked_terminals_icon'),
-            FieldRowPanel([
-                FieldPanel('blocked_terminals_text'),
-                FieldPanel('blocked_terminals_text_en')
-            ])
+            StreamFieldPanel('blocked_terminals_text'),
         ], heading='Пятый блок (Заблокированные терминалы)'),
         MultiFieldPanel([
             ImageChooserPanel('active_terminals_icon'),
-            FieldRowPanel([
-                FieldPanel('active_terminals_text'),
-                FieldPanel('active_terminals_text_en')
-            ])
+            StreamFieldPanel('active_terminals_text')
         ], heading='Активные терминалы'),
         MultiFieldPanel([
-            FieldRowPanel([
-                FieldPanel('display_text'),
-                FieldPanel('display_text_en')
-            ])
+            ImageChooserPanel('payments_icon'),
+            StreamFieldPanel('payments_text')
+        ], heading='Общая сумма платежей'),
+        MultiFieldPanel([
+            ImageChooserPanel('storage_icon'),
+            StreamFieldPanel('storage_text'),
+        ], heading='Количество хранений за сутки'),
+        MultiFieldPanel([
+            ImageChooserPanel('collections_icon'),
+            StreamFieldPanel('collections_text')
+        ], heading='Количество инкассаций за сутки'),
+        MultiFieldPanel([
+            ImageChooserPanel('cell_attachments_icon'),
+            StreamFieldPanel('cell_attachments_text'),
+        ], heading='Количество доступов за сутки'),
+        MultiFieldPanel([
+            ImageChooserPanel('mark_icon'),
+            StreamFieldPanel('mark_text'),
+        ], heading='Количество закладок за сутки'),
+        MultiFieldPanel([
+            ImageChooserPanel('cash_icon'),
+            StreamFieldPanel('cash_text'),
+        ], heading='Количество наличных денег'),
+        MultiFieldPanel([
+            StreamFieldPanel('display_text'),
+            StreamFieldPanel('change_config_button'),
         ], heading='Сообщения'),
-        FieldRowPanel([
-            FieldPanel('change_config_button'),
-            FieldPanel('change_config_button_en')
-        ]),
         StreamFieldPanel('api_links')
     ]
 
     class Meta:
         verbose_name = 'Главная страница'
         verbose_name_plural = 'Главные страницы'
-

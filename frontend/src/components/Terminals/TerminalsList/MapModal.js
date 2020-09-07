@@ -62,18 +62,18 @@ class MapModal extends Component {
         return (
             <div className="modal active">
                 <div className="modal__container">
-                    <div className="modal__block" style={{'min-width': '80%'}}>
+                    <div className="modal__block" style={{'minWidth': '80%'}}>
                         <div id='map' style={{'width': '100%', 'height': '500px'}}></div>
                         <div className="form__submit">
                             <input type="submit" className="button" onClick={e => {
                                 e.preventDefault();
                                 this.props.saveCoordinates(this.state.geoCoords)
-                            }} value="Сохранить"/>
+                            }} value={window.pageContent['add_terminal_save'][this.props.currentLanguage]}/>
                             <div className="cansel">
                                 <a href="" style={{'float': 'right'}} type="button" onClick={e => {
                                     e.preventDefault();
                                     this.props.closeMap()
-                                }}>Назад</a>
+                                }}>{window.pageContent['add_terminal_back'][this.props.currentLanguage]}</a>
                             </div>
                         </div>
                     </div>

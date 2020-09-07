@@ -19,7 +19,7 @@ class WaitingTerminalsCount extends Component {
             }}>
                 <a className="main__item" href="">
                     <div className="main__icon">
-                        <img src={'../../static/img/original_images/' + this.props.icon}
+                        <img src={'/media/original_images/' + this.props.icon}
                              alt={this.props.icon}/>
                     </div>
                     <div className="main__caption">

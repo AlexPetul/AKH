@@ -99,6 +99,7 @@ class OwnerTerminalsMap extends Component {
                 {this.state.showTerminalCard
                     ?
                     <TerminalMapCard
+                        currentLanguage={this.props.currentLanguage}
                         terminal={this.state.terminalDetails}
                         closeTab={this.closeTab}
                     />

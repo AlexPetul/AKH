@@ -22,7 +22,7 @@ class ModalWindow extends Component {
                                     <a href="" type="button" onClick={e => {
                                         e.preventDefault();
                                         this.props.sendAgainMail()
-                                    }}>Отправить повторно</a>
+                                    }}>{window.pageContent['modal_send_again'][this.props.currentLanguage]}</a>
                                 </div>
                                 :
                                 null

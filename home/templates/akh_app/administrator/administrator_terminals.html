@@ -11,13 +11,11 @@
         var menus = {{ menus|safe }};
         var apiPath = "{{ api_path }}";
         var languageId = {{ language_id }};
-        var page_header = "{{ page.page_header }}";
-
+        var pageContent = {{ page_content|safe }};
+        var statusColors = {{ status_colors|safe }};
         var terminalsPerPage = {{ page.terminals_per_page }};
         var keyActivationTime = {{ key_activation_time }};
         var portal_token = "{{ portal_token }}"
     </script>
-
-    <script src="{% static 'js/main.js' %}"></script>
 
 {% endblock content %}

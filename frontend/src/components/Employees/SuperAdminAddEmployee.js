@@ -10,35 +10,34 @@ import Loader from "../../controls/Loader";
 class SuperAdminAddEmployee extends Component {
     constructor() {
         super()
+        let currentLanguage = localStorage.getItem('lang_id') ? localStorage.getItem('lang_id') : 1;
         this.state = {
+            currentLanguage: currentLanguage,
             deleteModal: false,
             successModal: false,
             errorModal: false,
             errorText: "",
             showLoader: false,
-            userName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста имя")],
+            userName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_name_error'][currentLanguage])],
                 true),
 
-            userLastName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста фамилию")],
+            userLastName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_surname_error'][currentLanguage])],
                 true),
 
-            userPatronymic: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста отчество")],
-                true),
+            userPatronymic: new ValidationInput([], true),
 
-            userEmail: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста email адрес"),
-                new Rule(TypeOfRule.REGEX, "Введите пожалуйста email", /^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i),
+            userEmail: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_email_error'][currentLanguage]),
+                new Rule(TypeOfRule.REGEX, window.pageContent['invalid_email_error'][currentLanguage], /^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i),
             ], true),
 
-            userPhone: new ValidationInput([new Rule(TypeOfRule.REGEX, "Введите пожалуйста телефон", /^([\s]*)$|^(\s*)?(\+)?([- _():=+]?\d[- _():=+]?){10,14}(\s*)?$/)],
+            userPhone: new ValidationInput([new Rule(TypeOfRule.REGEX, window.pageContent['invalid_phone_error'][currentLanguage], /^([\s]*)$|^(\s*)?(\+)?([- _():=+]?\d[- _():=+]?){10,14}(\s*)?$/)],
                 true),
 
-            userPassword: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста пароль"),
-                new Rule(TypeOfRule.LENGTH5, "Пароль должен содержать более 5 символов"),
-            ]),
+            userPassword: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_password_error'][currentLanguage]),
+                new Rule(TypeOfRule.LENGTH5, window.pageContent['invalid_password_len_error'][currentLanguage])]),
 
-            userRepeatPassword: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Повторите пароль"),
-                new Rule(TypeOfRule.LENGTH5, "Пароль должен содержать более 5 символов"),
-            ]),
+            userRepeatPassword: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_password_repeat_error'][currentLanguage]),
+                new Rule(TypeOfRule.LENGTH5, window.pageContent['invalid_password_len_error'][currentLanguage])]),
 
             isAdminRole: false
         }
@@ -64,13 +63,13 @@ class SuperAdminAddEmployee extends Component {
                         let errorCode = response.data.errorCode;
                         if (errorCode === 6) {
                             this.setState({
-                                errorText: "Пользователь с указанным email уже существует.",
+                                errorText: window.pageContent['modal_email_exists'][this.state.currentLanguage],
                                 errorModal: true,
                                 showLoader: false
                             });
                         } else if (errorCode === 7) {
                             this.setState({
-                                errorText: "Пользователь с указанным телефоном уже существует.",
+                                errorText: window.pageContent['modal_phone_exists'][this.state.currentLanguage],
                                 errorModal: true,
                                 showLoader: false
                             });
@@ -111,9 +110,10 @@ class SuperAdminAddEmployee extends Component {
                     <div className="container">
                         <div className="form">
                             <form>
-                                <div className="caption">Добавить сотрудника</div>
+
+                                <div className="caption">{window.pageContent['add_employee_header'][this.state.currentLanguage]}</div>
                                 <Input
-                                    label="Имя"
+                                    label={window.pageContent['field_name'][this.state.currentLanguage]}
                                     name="userName"
                                     maxLength={30}
                                     value={userName.value}
@@ -124,7 +124,7 @@ class SuperAdminAddEmployee extends Component {
                                     validationMessageText={userName.validationMessage[0]}
                                 />
                                 <Input
-                                    label="Фамилия"
+                                    label={window.pageContent['field_surname'][this.state.currentLanguage]}
                                     name="userLastName"
                                     maxLength={30}
                                     value={userLastName.value}
@@ -135,7 +135,7 @@ class SuperAdminAddEmployee extends Component {
                                     validationMessageText={userLastName.validationMessage[0]}
                                 />
                                 <Input
-                                    label="Отчество"
+                                    label={window.pageContent['field_patronymic'][this.state.currentLanguage]}
                                     name="userPatronymic"
                                     maxLength={30}
                                     value={userPatronymic.value}
@@ -157,7 +157,7 @@ class SuperAdminAddEmployee extends Component {
                                     validationMessageText={userEmail.validationMessage[0]}
                                 />
                                 <Input
-                                    label="Телефон"
+                                    label={window.pageContent['field_phone'][this.state.currentLanguage]}
                                     name="userPhone"
                                     maxLength={20}
                                     value={userPhone.value}
@@ -175,13 +175,13 @@ class SuperAdminAddEmployee extends Component {
                                             }} type="checkbox"/>
                                             <i></i>
                                             <span>
-										Дать права на работу с данными сотрудников
+										{window.pageContent['field_give_admin_role'][this.state.currentLanguage]}
 									</span>
                                         </label>
                                     </div>
                                 </div>
                                 <Input
-                                    label="Пароль"
+                                    label={window.pageContent['field_password'][this.state.currentLanguage]}
                                     name="userPassword"
                                     maxLength={100}
                                     value={userPassword.value}
@@ -193,7 +193,7 @@ class SuperAdminAddEmployee extends Component {
                                     validationMessageText={userPassword.validationMessage[0]}
                                 />
                                 <Input
-                                    label="Повторите пароль"
+                                    label={window.pageContent['field_repeat_password'][this.state.currentLanguage]}
                                     name="userRepeatPassword"
                                     maxLength={100}
                                     value={userRepeatPassword.value}
@@ -208,12 +208,12 @@ class SuperAdminAddEmployee extends Component {
                                     <input type="submit" onClick={e => {
                                         e.preventDefault();
                                         this.submit()
-                                    }} className="button" value="Сохранить"/>
+                                    }} className="button" value={window.pageContent['save_button'][this.state.currentLanguage]}/>
                                     <div className="back">
-                                        <a href="#" onClick={event => {
+                                        <a href="" onClick={event => {
                                             event.preventDefault();
                                             this.props.handleChange(0)
-                                        }}>Вернуться</a>
+                                        }}>{window.pageContent['back_button'][this.state.currentLanguage]}</a>
                                     </div>
                                 </div>
                             </form>
@@ -226,23 +226,19 @@ class SuperAdminAddEmployee extends Component {
                             value="Ok"
                             showModal={this.state.errorModal}
                             onClose={(e) => {
-                                e.preventDefault();
+                                event.preventDefault();
                                 this.setState({errorModal: false});
                             }}
                         />
 
-                        {this.state.successModal
-                            ?
-                            <ModalWindow textTitle="Сотрудник успешно добавлен!" value="Ok"
-                                         showModal={this.state.successModal}
-                                         onClose={(e) => {
-                                             e.preventDefault();
-                                             window.location = ADMIN_EMPLOYEES;
-                                         }}
-                            />
-                            :
-                            null
-                        }
+                        <ModalWindow
+                            textTitle={window.pageContent['modal_success_add'][this.state.currentLanguage]}
+                            value="Ok"
+                            showModal={this.state.successModal}
+                            onClose={(e) => {
+                                window.location = ADMIN_EMPLOYEES;
+                            }}
+                        />
 
                     </div>
                 </div>

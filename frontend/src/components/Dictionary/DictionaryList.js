@@ -3,6 +3,7 @@ import API from '../../services/api'
 import Loader from "../../controls/Loader";
 import EmployeePagination from "../Employees/EmployeePagination";
 import ButtonIcon from "../../controls/ButtonIcon";
+import Title from "../../controls/Title";
 
 
 class DictionaryList extends Component {
@@ -65,18 +66,16 @@ class DictionaryList extends Component {
                     <div className="top top-flex-end">
                         <div className="top__left">
                             <div className="wrap-capton">
-                                <div className="caption">
-                                    {window.pageHeader}
-                                </div>
+                                <Title titleText={window.pageContent['page_header'][this.props.currentLanguage]} titleStyles='caption'/>
                             </div>
                             <form>
                                 <div className="form__input">
                                     <div className="label-input">
-                                        {window.filterText}
+                                        {window.pageContent['filter_dict_text'][this.props.currentLanguage]}
                                     </div>
                                     <div className="select">
                                         <select defaultValue="Выбор справочника">
-                                            <option>Типоразмеры ячеек</option>
+                                            <option>{window.languageId === 1 ? "Типоразмеры ячеек" : "Cell parameters"}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -86,38 +85,40 @@ class DictionaryList extends Component {
                             <a href="#" onClick={e => {
                                 e.preventDefault();
                                 this.props.handler(1)
-                            }} className="button">{window.buttonAddText}</a>
+                            }} className="button">{window.pageContent['button_add'][this.props.currentLanguage]}</a>
                         </div>
                     </div>
                     <div className="table-wrap">
                         <table>
-                            <tr>
-                                <th>{window.tablePosition}</th>
-                                <th>{window.tableName}</th>
-                                <th>{window.tableDescription}</th>
-                                <th></th>
-                            </tr>
-                            {dictListSliced.map((cellParam) =>
+                            <tbody>
                                 <tr>
-                                    <td>№{cellParam.id}</td>
-                                    <td>
-                                        {cellParam.name}
-                                    </td>
-                                    <td>
-                                        {cellParam.description}
-                                    </td>
-                                    <td>
-                                        <ButtonIcon
-                                            className="button-gear"
-                                            handleClick={e => {
-                                                e.preventDefault();
-                                                this.props.handler(2, cellParam)
-                                            }}
-                                            title="Редактировать"
-                                        />
-                                    </td>
+                                    <th>{window.pageContent['table_position'][this.props.currentLanguage]}</th>
+                                    <th>{window.pageContent['table_name'][this.props.currentLanguage]}</th>
+                                    <th>{window.pageContent['table_description'][this.props.currentLanguage]}</th>
+                                    <th></th>
                                 </tr>
-                            )}
+                                {dictListSliced.map((cellParam, cell_index) =>
+                                    <tr key={cell_index}>
+                                        <td>{cellParam.id}</td>
+                                        <td>
+                                            {cellParam.name}
+                                        </td>
+                                        <td>
+                                            {cellParam.description}
+                                        </td>
+                                        <td>
+                                            <ButtonIcon
+                                                className="button-gear"
+                                                handleClick={e => {
+                                                    e.preventDefault();
+                                                    this.props.handler(2, cellParam)
+                                                }}
+                                                title="Редактировать"
+                                            />
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
                         </table>
                     </div>
 

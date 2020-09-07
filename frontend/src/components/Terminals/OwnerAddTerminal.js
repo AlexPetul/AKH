@@ -1,6 +1,5 @@
 import React, {Component, useState} from 'react'
-import {Rule, TypeOfRule, ValidateState, ValidationInput} from "../../helpers/ValidationHelper";
-import Input from "../../controls/Input";
+import {ValidationInput} from "../../helpers/ValidationHelper";
 import Textarea from "../../controls/Textarea"
 import API from "../../services/api";
 import ModalWindow from "../ModalWindow";
@@ -13,46 +12,51 @@ import Loader from "../../controls/Loader";
 class OwnerAddTerminal extends Component {
     constructor() {
         super()
+        let currentLanguage = localStorage.getItem('lang_id') ? localStorage.getItem('lang_id') : 1;
         this.state = {
+            currentLanguage: currentLanguage,
             showModal: false,
+            modalEmptyAddr: false,
             mapModal: false,
             showLoader: false,
             sendActivationStatus: false,
             latitude: null,
             longitude: null,
-            terminalDescription: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста описание")],
-                true),
+            terminalDescription: new ValidationInput([], true),
         }
     }
 
     submit = () => {
-        let validationResult = ValidateState(this.state);
-        this.setState({...validationResult.state});
-        this.setState({showLoader: true}, () => {
-            API.post('updateTerminal', {
-                id: 0,
-                description: this.state.terminalDescription.value,
-                latitude: this.state.latitude,
-                longitude: this.state.longitude,
-                address: document.getElementsByClassName('react-dadata__input')[0].value
-            })
-                .then(response => {
-                    let newTerminalId = response.data.data.id;
-
-                    if (this.state.sendActivationStatus) {
-                        API.post('setTerminalStatus', {
-                            sourceId: newTerminalId,
-                            statusId: 302,
-                            statusComment: ""
-                        })
-                            .then(response => {
-                                this.setState({showModal: true})
-                            })
-                    } else {
-                        this.setState({showModal: true})
-                    }
+        let address = document.getElementsByClassName('react-dadata__input')[0].value;
+        if (address.length !== 0) {
+            this.setState({showLoader: true}, () => {
+                API.post('updateTerminal', {
+                    id: 0,
+                    description: this.state.terminalDescription.value,
+                    latitude: this.state.latitude,
+                    longitude: this.state.longitude,
+                    address: address
                 })
-        });
+                    .then(response => {
+                        let newTerminalId = response.data.data.id;
+
+                        if (this.state.sendActivationStatus) {
+                            API.post('setTerminalStatus', {
+                                sourceId: newTerminalId,
+                                statusId: 302,
+                                statusComment: ""
+                            })
+                                .then(response => {
+                                    this.setState({showLoader: false, showModal: true})
+                                })
+                        } else {
+                            this.setState({showLoader: false, showModal: true})
+                        }
+                    })
+            });
+        } else {
+            this.setState({modalEmptyAddr: true});
+        }
     };
 
     handleChange = event => {
@@ -81,17 +85,16 @@ class OwnerAddTerminal extends Component {
 
     render() {
         const {terminalDescription} = this.state;
-        // const [value, setValue] = useState();
 
         return (
             <div className="content">
                 <div className="container">
                     <div className="form">
                         <form>
-                            <div className="caption">Добавить терминал</div>
+                            <div className="caption">{window.pageContent['add_terminal_text'][this.state.currentLanguage]}</div>
 
                             <Textarea
-                                label="Описание терминала"
+                                label={window.pageContent['add_terminal_description'][this.state.currentLanguage]}
                                 name="terminalDescription"
                                 value={terminalDescription.value}
                                 onChange={this.handleChange}
@@ -105,11 +108,13 @@ class OwnerAddTerminal extends Component {
 
                             <div className="form__input">
                                 <div className="label-input">
-                                    Адрес терминала
+                                    {window.pageContent['add_terminal_address'][this.state.currentLanguage]}
                                 </div>
                                 <AddressSuggestions
                                     className='input'
-                                    token="24e416237ebb0c44592567b8f6cf67111453fd2a"/>
+                                    token="24e416237ebb0c44592567b8f6cf67111453fd2a"
+                                />
+                                <small className="coordinates__small">{window.pageContent['coordinates_text'][this.state.currentLanguage]}: {this.state.latitude ? '(' + this.state.latitude.toFixed(2) + ', ' + this.state.longitude.toFixed(2) + ')' : window.pageContent['coordinates_not_found'][this.state.currentLanguage]}</small>
                             </div>
 
                             <div className="form__input">
@@ -117,7 +122,7 @@ class OwnerAddTerminal extends Component {
                                     e.preventDefault();
                                     this.showMap()
                                 }}
-                                       style={{'background-color': '#97A0B6'}} value="Указать на карте"/>
+                                       style={{'backgroundColor': '#97A0B6'}} value={window.pageContent['add_terminal_map_button'][this.state.currentLanguage]}/>
                             </div>
                             <div className="form__input">
                                 <div className="check check_nowrap">
@@ -127,19 +132,20 @@ class OwnerAddTerminal extends Component {
                                         }/>
                                         <i></i>
                                         <span>
-										Отправить запрос на активацию после добавления
+										{window.pageContent['add_terminal_send_request'][this.state.currentLanguage]}
 									</span>
                                     </label>
                                 </div>
                             </div>
 
                             <div className="form__submit">
-                                <input type="button" onClick={this.submit} className="button" value="Сохранить"/>
+                                <input type="button" onClick={this.submit} className="button"
+                                       value={window.pageContent['add_terminal_save'][this.state.currentLanguage]}/>
                                 <div className="back">
                                     <a href="" onClick={event => {
                                         event.preventDefault();
                                         window.location = OWNER_TERMINALS;
-                                    }}>Вернуться</a>
+                                    }}>{window.pageContent['add_terminal_back'][this.state.currentLanguage]}</a>
                                 </div>
                             </div>
 
@@ -148,11 +154,22 @@ class OwnerAddTerminal extends Component {
 
                     <Loader showLoader={this.state.showLoader}/>
 
-                    <ModalWindow textTitle="Терминал успешно добавлен!" value="Ok"
-                                 showModal={this.state.showModal}
-                                 onClose={(e) => {
-                                     window.location = OWNER_TERMINALS;
-                                 }}
+                    <ModalWindow
+                        textTitle={window.pageContent['modal_add_success'][this.state.currentLanguage]}
+                        value="Ok"
+                        showModal={this.state.showModal}
+                        onClose={(e) => {
+                            window.location = OWNER_TERMINALS;
+                        }}
+                    />
+
+                    <ModalWindow
+                        textTitle={window.pageContent['modal_empty_addr'][this.state.currentLanguage]}
+                        value="Ok"
+                        showModal={this.state.modalEmptyAddr}
+                        onClose={(e) => {
+                            this.setState({modalEmptyAddr: false});
+                        }}
                     />
 
                 </div>
@@ -160,6 +177,7 @@ class OwnerAddTerminal extends Component {
                 {this.state.mapModal
                     ?
                     <MapModal
+                        currentLanguage={this.state.currentLanguage}
                         lat={this.state.latitude}
                         long={this.state.longitude}
                         saveCoordinates={this.saveCoordinates}

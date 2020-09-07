@@ -42,7 +42,7 @@ class TerminalMapCard extends Component {
 							</svg>
 						</span>
                         <div className="map-data-card__head">
-                            Терминал №{this.props.terminal.id}
+                            {window.languageId === 1 ? "Терминал" : "Terminal"} №{this.props.terminal.id}
                             {this.state.terminalStatuses.map((status) =>
                                 status.id === this.props.terminal.statusId ?
                                     <span
@@ -55,11 +55,11 @@ class TerminalMapCard extends Component {
                                 {/*<span className="map-data-card__subtext">Казань, Россия</span>*/}
                             </li>
                             <li>
-                                <span className="map-data-card__subtext">Ключ:</span>
+                                <span className="map-data-card__subtext">{window.pageContent['card_token'][this.props.currentLanguage]}:</span>
                                 <b className="map-data-card__text">{this.props.terminal.token}</b>
                             </li>
                             <li>
-                                <span className="map-data-card__subtext">Срок истечения ключа:</span>
+                                <span className="map-data-card__subtext">{window.pageContent['card_token_expires'][this.props.currentLanguage]}:</span>
                                 {this.props.terminal.expires
                                     ?
                                     <b className="map-data-card__text">{Moment(this.props.terminal.expires).format('DD.MM.YYYY hh:mm:ss')}</b>
@@ -68,21 +68,21 @@ class TerminalMapCard extends Component {
                                 }
                             </li>
                             <li>
-                                <span className="map-data-card__subtext">Дата установки статуса:</span>
+                                <span className="map-data-card__subtext">{window.pageContent['card_status_date'][this.props.currentLanguage]}:</span>
                                 <b className="map-data-card__text">{Moment(this.props.terminal.statusDateTime).format('DD.MM.YYYY hh:mm:ss')}</b>
                             </li>
                         </ul>
                         <div className="wrap-listBlocks">
-                            <span className="map-data-card__subtext">Количество ячеек:</span>
-                            <b>Всего {this.props.terminal.cellsCount}:</b>
+                            <span className="map-data-card__subtext">{window.pageContent['table_cells_count'][this.props.currentLanguage]}:</span>
+                            <b>{window.pageContent['table_cells_total'][this.props.currentLanguage]} {this.props.terminal.cellsCount}:</b>
                             <ul className="listBlocks listBlocks-flex-row">
-                                <il className="listBlock__item listBlock__item-current">Свободна
+                                <il className="listBlock__item listBlock__item-current">{window.pageContent['table_cells_free'][this.props.currentLanguage]}
                                     - {this.props.terminal.cells[0].count}</il>
-                                <il className="listBlock__item listBlock__item-worning ">Занята
+                                <il className="listBlock__item listBlock__item-worning ">{window.pageContent['table_cells_busy'][this.props.currentLanguage]}
                                     - {this.props.terminal.cells[1].count}</il>
-                                <il className="listBlock__item listBlock__item-success">Резерв
+                                <il className="listBlock__item listBlock__item-success">{window.pageContent['table_cells_reserve'][this.props.currentLanguage]}
                                     - {this.props.terminal.cells[2].count}</il>
-                                <il className="listBlock__item listBlock__item-error">Блокировка
+                                <il className="listBlock__item listBlock__item-error">{window.pageContent['table_cells_blocked'][this.props.currentLanguage]}
                                     - {this.props.terminal.cells[3].count}</il>
                             </ul>
                         </div>

@@ -26,7 +26,7 @@ class TerminalDescription extends Component {
             latitude: this.props.terminal.latitude,
             longitude: this.props.terminal.longitude,
             mapModal: false,
-            description: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста описание")],
+            description: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.addTerminalDescError)],
                 true, this.props.terminal.description),
             address: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста адрес")],
                 true, this.props.terminal.address)
@@ -58,22 +58,19 @@ class TerminalDescription extends Component {
     };
 
     confirmRequest = (newStatus) => {
-        this.setState({showLoader: true}, () => {
-            API.post('setTerminalStatus', {
-                sourceId: this.props.terminal.id,
-                statusId: Number(newStatus),
-                statusComment: ""
+        API.post('setTerminalStatus', {
+            sourceId: this.props.terminal.id,
+            statusId: Number(newStatus),
+            statusComment: ""
+        })
+            .then(response => {
+                console.log(response)
+                this.setState({
+                    activationModal: false,
+                    deleteRequest: false
+                });
+                window.location = OWNER_TERMINALS;
             })
-                .then(response => {
-                    console.log(response)
-                    this.setState({
-                        activationModal: false,
-                        deleteRequest: false,
-                        showLoader: false
-                    });
-                    window.location = OWNER_TERMINALS;
-                })
-        });
     };
 
     sendRejectActivation() {
@@ -81,19 +78,17 @@ class TerminalDescription extends Component {
     }
 
     confirmSendRejectActivation = (_) => {
-        this.setState({showLoader: true}, () => {
-            API.post('setTerminalStatus', {
-                sourceId: this.props.terminal.id,
-                statusId: 301,
-                statusComment: ""
-            })
-                .then(response => {
-                    console.log(response);
+        API.post('setTerminalStatus', {
+            sourceId: this.props.terminal.id,
+            statusId: 301,
+            statusComment: ""
+        })
+            .then(response => {
+                console.log(response);
 
-                    this.setState({sendRejectActivationModal: false, showLoader: false});
-                    window.location = OWNER_TERMINALS;
-                })
-        });
+                this.setState({sendRejectActivationModal: false});
+                window.location = OWNER_TERMINALS;
+            })
     };
 
     cancelSendRejectActivation = () => {
@@ -211,7 +206,7 @@ class TerminalDescription extends Component {
                         <form>
 
                             <Textarea
-                                label="Описание терминала"
+                                label={window.pageContent['add_terminal_description'][this.props.currentLanguage]}
                                 name="description"
                                 value={description.value}
                                 onChange={this.handleChange}
@@ -223,9 +218,9 @@ class TerminalDescription extends Component {
                                 rows="10"
                             />
 
-                            <div className="row row-flex-end" style={{'margin-left': '0px'}}>
+                            <div className="row row-flex-end" style={{'marginLeft': '0px'}}>
                                 <Input
-                                    label="Адрес терминала"
+                                    label={window.pageContent['add_terminal_address'][this.props.currentLanguage]}
                                     name="address"
                                     maxLength={100}
                                     value={address.value}
@@ -240,12 +235,13 @@ class TerminalDescription extends Component {
                                     <input type="submit" className="button-deactive" onClick={e => {
                                         e.preventDefault();
                                         this.showMap()
-                                    }} value="Указать на карте"/>
+                                    }} value={window.pageContent['add_terminal_map_button'][this.props.currentLanguage]}/>
                                 </div>
                             </div>
 
                             <div className="form__submit">
-                                <input onClick={this.submit} type="submit" className="button" value="Сохранить"/>
+                                <input onClick={this.submit} type="submit" className="button"
+                                       value={window.pageContent['add_terminal_save'][this.props.currentLanguage]}/>
                             </div>
 
                             <div className="serviceBtn">
@@ -263,7 +259,7 @@ class TerminalDescription extends Component {
                                                     d="M7.49967 2.5V3.33333H3.33301V5H4.16634V15.8333C4.16634 16.2754 4.34194 16.6993 4.6545 17.0118C4.96706 17.3244 5.39098 17.5 5.83301 17.5H14.1663C14.6084 17.5 15.0323 17.3244 15.3449 17.0118C15.6574 16.6993 15.833 16.2754 15.833 15.8333V5H16.6663V3.33333H12.4997V2.5H7.49967ZM7.49967 6.66667H9.16634V14.1667H7.49967V6.66667ZM10.833 6.66667H12.4997V14.1667H10.833V6.66667Z"
                                                     fill="#575D6C"/>
                                             </svg>
-                                            Удалить
+                                            {window.pageContent['action_delete'][this.props.currentLanguage]}
                                         </button>
                                     </React.Fragment>
                                     : null}
@@ -281,7 +277,7 @@ class TerminalDescription extends Component {
                                                     d="M7.49967 2.5V3.33333H3.33301V5H4.16634V15.8333C4.16634 16.2754 4.34194 16.6993 4.6545 17.0118C4.96706 17.3244 5.39098 17.5 5.83301 17.5H14.1663C14.6084 17.5 15.0323 17.3244 15.3449 17.0118C15.6574 16.6993 15.833 16.2754 15.833 15.8333V5H16.6663V3.33333H12.4997V2.5H7.49967ZM7.49967 6.66667H9.16634V14.1667H7.49967V6.66667ZM10.833 6.66667H12.4997V14.1667H10.833V6.66667Z"
                                                     fill="#575D6C"/>
                                             </svg>
-                                            Заблокировать
+                                            {window.pageContent['action_block'][this.props.currentLanguage]}
                                         </button>
                                     </React.Fragment>
                                     : null}
@@ -297,7 +293,7 @@ class TerminalDescription extends Component {
                                                  xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M0 0V11H3V20L10 8H6L10 0H0Z" fill="#575D6C"/>
                                             </svg>
-                                            Отправить запрос на активацию
+                                            {window.pageContent['action_send_request'][this.props.currentLanguage]}
                                         </button>
                                     </React.Fragment>
                                     : null}
@@ -313,7 +309,7 @@ class TerminalDescription extends Component {
                                                  xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M0 0V11H3V20L10 8H6L10 0H0Z" fill="#575D6C"/>
                                             </svg>
-                                            Отменить активацию
+                                            {window.pageContent['action_reject'][this.props.currentLanguage]}
                                         </button>
                                     </React.Fragment>
                                     : null}
@@ -328,7 +324,7 @@ class TerminalDescription extends Component {
                                             d="M10.3146 7.50368C12.3775 7.50368 14.0279 9.17116 14.0279 11.2555C14.0279 11.9892 13.8216 12.6812 13.4585 13.2565L16 15.8411L14.853 17L12.2785 14.4404C11.7091 14.7989 11.0325 15.0074 10.3146 15.0074C8.25168 15.0074 6.60134 13.3399 6.60134 11.2555C6.60134 9.17116 8.25168 7.50368 10.3146 7.50368ZM10.3146 9.17116C9.76748 9.17116 9.24276 9.39076 8.85589 9.78166C8.46902 10.1725 8.25168 10.7027 8.25168 11.2555C8.25168 11.8083 8.46902 12.3385 8.85589 12.7294C9.24276 13.1203 9.76748 13.3399 10.3146 13.3399C10.8617 13.3399 11.3864 13.1203 11.7733 12.7294C12.1602 12.3385 12.3775 11.8083 12.3775 11.2555C12.3775 10.7027 12.1602 10.1725 11.7733 9.78166C11.3864 9.39076 10.8617 9.17116 10.3146 9.17116ZM1.65034 0H13.2027C14.1186 0 14.853 0.74203 14.853 1.66748V8.36243C14.4404 7.69544 13.8711 7.12016 13.2027 6.66994V1.66748H1.65034V13.3399H5.36359C5.61939 13.9652 5.99072 14.5238 6.44456 15.0074H1.65034C0.734399 15.0074 0 14.2653 0 13.3399V1.66748C0 0.74203 0.734399 0 1.65034 0ZM3.30067 3.33497H11.5523V5.00245H3.30067V3.33497ZM3.30067 6.66994H7.45126C6.79113 7.08681 6.22176 7.66209 5.77617 8.33742H3.30067V6.66994ZM3.30067 10.0049H5.09128C5.00052 10.4218 4.95101 10.8386 4.95101 11.2555V11.6724H3.30067V10.0049Z"
                                             fill="#575D6C"/>
                                     </svg>
-                                    Скачать логи
+                                    {window.pageContent['action_logs'][this.props.currentLanguage]}
                                 </button>
 
                             </div>
@@ -340,7 +336,7 @@ class TerminalDescription extends Component {
                     {this.state.activationModal
                         ?
                         <ConfirmationModal
-                            textTitle="Отправить запрос на активацию?"
+                            textTitle={window.pageContent['modal_send_activation'][this.props.currentLanguage]}
                             showModal={this.state.activationModal}
                             rejectRequest={this.rejectSendingRequest}
                             confirmRequest={this.confirmRequest}
@@ -353,7 +349,7 @@ class TerminalDescription extends Component {
                     {this.state.deleteRequest
                         ?
                         <ConfirmationModal
-                            textTitle="Вы действительно хотите удалить терминал?"
+                            textTitle={window.pageContent['modal_delete'][this.props.currentLanguage]}
                             showModal={this.state.deleteRequest}
                             rejectRequest={this.rejectDeleteRequest}
                             confirmRequest={this.confirmRequest}
@@ -366,7 +362,7 @@ class TerminalDescription extends Component {
                     {this.state.sendRejectActivationModal
                         ?
                         <ConfirmationModal
-                            textTitle="Отменить запрос на активацию терминала?"
+                            textTitle={window.pageContent['modal_cancel_activation'][this.props.currentLanguage]}
                             showModal={this.state.sendRejectActivationModal}
                             rejectRequest={this.cancelSendRejectActivation}
                             confirmRequest={this.confirmSendRejectActivation}
@@ -379,7 +375,7 @@ class TerminalDescription extends Component {
                     {this.state.blockTerminalModal
                         ?
                         <ConfirmationModal
-                            textTitle="Вы уверены что хотите заблокировать терминал?"
+                            textTitle={window.pageContent['modal_block_confirm'][this.props.currentLanguage]}
                             showModal={this.state.blockTerminalModal}
                             rejectRequest={this.cancelBlockTerminal}
                             confirmRequest={this.confirmBlockTerminal}
@@ -392,7 +388,7 @@ class TerminalDescription extends Component {
                     {this.state.sendLogsModal
                         ?
                         <SendLogsModal
-                            textTitle="Введите адрес почтового ящика"
+                            textTitle={window.pageContent['modal_logs_email'][this.props.currentLanguage]}
                             showModal={this.state.sendLogsModal}
                             rejectRequest={this.closeSendLogsModal}
                             confirmRequest={this.sendTerminalLogs}
@@ -402,14 +398,14 @@ class TerminalDescription extends Component {
                     }
 
                     <ModalWindow
-                        textTitle="Логи успешно отправлены на почту!"
+                        textTitle={window.pageContent['modal_logs_success'][this.props.currentLanguage]}
                         value="Ok"
                         showModal={this.state.successSendLogsModal}
                         onClose={(e) => this.setState({successSendLogsModal: false})}
                     />
 
                     <ModalWindow
-                        textTitle="Информация о терминале успешно изменена!"
+                        textTitle={window.pageContent['modal_edit_success'][this.props.currentLanguage]}
                         value="Ok"
                         showModal={this.state.editTerminalSuccess}
                         onClose={(e) => this.setState({editTerminalSuccess: false})}
@@ -418,6 +414,7 @@ class TerminalDescription extends Component {
                     {this.state.mapModal
                         ?
                         <MapModal
+                            currentLanguage={this.props.currentLanguage}
                             lat={this.state.latitude}
                             long={this.state.longitude}
                             saveCoordinates={this.saveCoordinates}

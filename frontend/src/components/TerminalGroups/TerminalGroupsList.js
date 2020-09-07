@@ -45,28 +45,28 @@ class TerminalGroupsList extends Component {
         this.setState({
             itemsPerPage: window.employeesPerPage,
             rightBound: window.employeesPerPage
-        })
+        });
 
         this.setState({showLoader: true}, () => {
             API.get('getTerminalGroups')
                 .then(response => {
-                    let terminalGroups = response.data.data.list
-                    let countPages = Math.ceil(terminalGroups.length / this.state.itemsPerPage)
+                    let terminalGroups = response.data.data.list;
+                    let countPages = Math.ceil(terminalGroups.length / this.state.itemsPerPage);
                     API.get('getDictionary', {
                         params: {
                             name: 'configurations'
                         }
                     })
                         .then(result => {
-                            let configurations = result.data.data
+                            let configurations = result.data.data;
 
                             this.setState({
                                 groupsList: terminalGroups,
                                 configurations: configurations,
                                 countPages: countPages,
                                 countTerminalGroups: terminalGroups.length
-                            })
-                            this.props.groupsHandler(terminalGroups)
+                            });
+                            this.props.groupsHandler(terminalGroups);
                             this.setState({showLoader: false})
                         })
                 })
@@ -86,14 +86,14 @@ class TerminalGroupsList extends Component {
             editingGroup: terminalGroup,
             editGroupOwnerInfo: owner
         })
-    }
+    };
 
     rejectEditing = () => {
         this.setState({
             editGroup: false,
             editingGroup: null
         })
-    }
+    };
 
     confirmEditing = (name, description) => {
         API.post('updateTerminalGroup', {
@@ -111,7 +111,7 @@ class TerminalGroupsList extends Component {
                     }
                 }
             })
-    }
+    };
 
     switchContext = (groupId) => {
         localStorage.setItem('context_id', groupId);
@@ -128,7 +128,7 @@ class TerminalGroupsList extends Component {
     render() {
         let employeeListSliced = this.state.groupsList.slice(
             this.state.leftBound, this.state.rightBound
-        )
+        );
 
         if (employeeListSliced.length === 0) {
             employeeListSliced = this.state.groupsList.slice(0, 7)
@@ -138,12 +138,13 @@ class TerminalGroupsList extends Component {
             <React.Fragment>
                 <div className="table-wrap">
                     <table>
+                        <tbody>
                         <tr>
-                            <th>Название группы</th>
-                            <th>ФИО</th>
+                            <th>{window.pageContent['table_name'][this.props.currentLanguage]}</th>
+                            <th>{window.pageContent['table_fio'][this.props.currentLanguage]}</th>
                             <th>Email</th>
-                            <th>Телефон</th>
-                            <th>Конфигурация</th>
+                            <th>{window.pageContent['table_phone'][this.props.currentLanguage]}</th>
+                            <th>{window.pageContent['table_configuration'][this.props.currentLanguage]}</th>
                             <th></th>
                         </tr>
                         {employeeListSliced.map((terminalGroup, index) =>
@@ -187,6 +188,7 @@ class TerminalGroupsList extends Component {
                                 </td>
                             </tr>
                         )}
+                        </tbody>
                     </table>
                 </div>
 
@@ -208,6 +210,7 @@ class TerminalGroupsList extends Component {
                 {this.state.editGroup
                     ?
                     <TerminalGroupModal
+                        currentLanguage={this.props.currentLanguage}
                         group={this.state.editingGroup}
                         owner={this.state.editGroupOwnerInfo}
                         confirmEditing={this.confirmEditing}

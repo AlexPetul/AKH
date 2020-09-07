@@ -25,6 +25,8 @@
   },
   "dependencies": {
     "axios": "^0.19.2",
+    "imask": "^6.0.5",
+    "inputmask": "^5.0.3",
     "mapbox-gl": "^1.11.1",
     "moment": "^2.27.0",
     "rc-datepicker": "^5.0.16",
@@ -34,6 +36,7 @@
     "react-router-dom": "^5.2.0",
     "react-string-replace": "^0.4.4",
     "style-loader": "^1.2.1",
-    "styled-components": "^5.1.1"
+    "styled-components": "^5.1.1",
+    "uglify-js": "^3.10.2"
   }
 }

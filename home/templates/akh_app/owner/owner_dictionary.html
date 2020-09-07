@@ -9,35 +9,13 @@
 
     <script>
         var menus = {{ menus|safe }};
+        var languageIcons = {{ languages_icons|safe }};
         var apiPath = "{{ api_path }}";
         var languageId = {{ language_id }};
-        var pageHeader = "";
-        var buttonAddText = "";
-        var filterText = "";
-        var tablePosition = "";
-        var tableName = "";
-        var tableDescription = "";
-        if (languageId === 2) {
-            pageHeader = "{{ page.page_header_en }}";
-            buttonAddText = "{{ page.button_add_en }}";
-            filterText = "{{ page.filter_dict_text_en }}";
-            tablePosition = "{{ page.table_position_en }}";
-            tableName = "{{ page.table_name_en }}";
-            tableDescription = "{{ page.table_description_en }}";
-        } else {
-            pageHeader = "{{ page.page_header }}";
-            buttonAddText = "{{ page.button_add }}";
-            filterText = "{{ page.filter_dict_text }}";
-            tablePosition = "{{ page.table_position }}";
-            tableName = "{{ page.table_name }}";
-            tableDescription = "{{ page.table_description }}";
-        }
-        var authMenus = {{ auth_menus|safe }};
-        var portal_token = "{{ portal_token }}"
-        var itemsPerPage = {{ page.items_per_page }}
+        var pageContent = {{ page_content|safe }};
+        var portal_token = "{{ portal_token }}";
+        var itemsPerPage = {{ page.items_per_page }};
 
     </script>
-    
-    <script src="{% static 'js/main.js' %}"></script>
 
 {% endblock content %}

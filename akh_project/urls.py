@@ -6,7 +6,9 @@ from akh_app.views import (login_view, reset_password_view, send_confirmation_ma
                            owner_terminals_view, dictionaries_view, owner_employees_view, administrator_main_view,
                            administrator_profile_view, administrator_employees_view, administrator_terminalgroups_view,
                            administrator_terminals_view, base_page_view, change_language_view, logout_view, save_configuration_view,
-                           save_context_id, super_admin_logout)
+                           save_context_id, super_admin_logout, owner_payments_view, owner_collections_view, owner_storages_view,
+                           owner_tariffs_view, owner_clients_view, owner_receivers_view, owner_accesses_view,
+                           owner_stowage_view)
 
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.core import urls as wagtail_urls
@@ -22,7 +24,6 @@ urlpatterns = [
     url(r'^logout/$', logout_view, name='logout_view'),
     url(r'^save-configuration/$', save_configuration_view, name='save_configuration_view'),
     url(r'^save-context/$', save_context_id, name='save_context_id'),
-    # url(r'^update-token/$', save_context_id, name='save_context_id'),
     url(r'^delete-context/$', super_admin_logout, name='super_admin_logout'),
     url(r'^forgotpassword/$', reset_password_view, name='reset_password_view'),
     url(r'^send-reset-mail/$', send_confirmation_mail, name='send_confirmation_mail'),
@@ -38,6 +39,14 @@ urlpatterns = [
     url(r'^owner/terminals/$', owner_terminals_view, name='owner_terminals_view'),
     url(r'^owner/dictionaries/$', dictionaries_view, name='dictionaries_view'),
     url(r'^owner/employees/$', owner_employees_view, name='owner_employees_view'),
+    url(r'^owner/clients/$', owner_clients_view, name='owner_clients_view'),
+    url(r'^owner/receivers/$', owner_receivers_view, name='owner_receivers_view'),
+    url(r'^owner/accesses/$', owner_accesses_view, name='owner_accesses_view'),
+    url(r'^owner/payments/$', owner_payments_view, name='owner_payments_view'),
+    url(r'^owner/collections/$', owner_collections_view, name='owner_collections_view'),
+    url(r'^owner/storages/$', owner_storages_view, name='owner_storages_view'),
+    url(r'^owner/stowage/$', owner_stowage_view, name='owner_stowage_view'),
+    url(r'^owner/tariffs/$', owner_tariffs_view, name='owner_tariffs_view'),
 
     url(r'^administrator/$', administrator_main_view, name='administrator_main_view'),
     url(r'^administrator/profile/$', administrator_profile_view, name='administrator_profile_view'),
@@ -56,17 +65,9 @@ if settings.DEBUG:
     from django.conf.urls.static import static
     from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
-    # Serve static and media files from development server
     urlpatterns += staticfiles_urlpatterns()
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns = urlpatterns + [
-    # For anything not caught by a more specific rule above, hand over to
-    # Wagtail's page serving mechanism. This should be the last pattern in
-    # the list:
     url(r"", include(wagtail_urls)),
-
-    # Alternatively, if you want Wagtail pages to be served from a subpath
-    # of your site, rather than the site root:
-    #    url(r"^pages/", include(wagtail_urls)),
 ]

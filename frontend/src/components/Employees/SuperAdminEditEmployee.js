@@ -11,25 +11,26 @@ import Loader from "../../controls/Loader";
 class SuperAdminEditEmployee extends Component {
     constructor(props) {
         super(props);
+        let currentLanguage = localStorage.getItem('lang_id') ? localStorage.getItem('lang_id') : 1;
         this.state = {
+            currentLanguage: currentLanguage,
             deleteModal: false,
             successModal: false,
             showLoader: false,
             isSuperAdmin: this.props.editingEmployee.roleId === 102,
-            userName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста имя")],
+            userName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_name_error'][currentLanguage])],
                 true, this.props.editingEmployee.firstName),
 
-            userLastName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста фамилию")],
+            userLastName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_surname_error'][currentLanguage])],
                 true, this.props.editingEmployee.lastName),
 
-            userPatronymic: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста отчество")],
-                true, this.props.editingEmployee.surName),
+            userPatronymic: new ValidationInput([], true, this.props.editingEmployee.surName),
 
-            userEmail: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста email адрес"),
-                new Rule(TypeOfRule.REGEX, "Введите пожалуйста email", /^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i),
+            userEmail: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_email_error'][currentLanguage]),
+                new Rule(TypeOfRule.REGEX, window.pageContent['invalid_email_error'][currentLanguage], /^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i),
             ], true, this.props.editingEmployee.email),
 
-            userPhone: new ValidationInput([new Rule(TypeOfRule.REGEX, "Введите пожалуйста телефон", /^([\s]*)$|^(\s*)?(\+)?([- _():=+]?\d[- _():=+]?){10,14}(\s*)?$/)],
+            userPhone: new ValidationInput([new Rule(TypeOfRule.REGEX, window.pageContent['invalid_phone_error'][currentLanguage], /^([\s]*)$|^(\s*)?(\+)?([- _():=+]?\d[- _():=+]?){10,14}(\s*)?$/)],
                 true, this.props.editingEmployee.phone),
 
         }
@@ -37,7 +38,7 @@ class SuperAdminEditEmployee extends Component {
 
     submit = () => {
         let validationResult = ValidateState(this.state);
-        this.setState({...validationResult.state})
+        this.setState({...validationResult.state});
         if (validationResult.isValid) {
             let data = {
                 id: this.props.editingEmployee.id,
@@ -110,16 +111,17 @@ class SuperAdminEditEmployee extends Component {
     }
 
     render() {
-        const {userName, userLastName, userPatronymic, userEmail, userPhone, userPassword, userPasswordRepeat} = this.state
+        const {userName, userLastName, userPatronymic, userEmail, userPhone} = this.state;
 
         return (
             <div className="content">
                 <div className="container">
                     <div className="form">
                         <form>
-                            <div className="caption">Редактировать сотрудника</div>
+                            <div
+                                className="caption">{window.pageContent['edit_employee_header'][this.state.currentLanguage]}</div>
                             <Input
-                                label="Имя"
+                                label={window.pageContent['field_name'][this.state.currentLanguage]}
                                 name="userName"
                                 maxLength={30}
                                 value={userName.value}
@@ -130,7 +132,7 @@ class SuperAdminEditEmployee extends Component {
                                 validationMessageText={userName.validationMessage[0]}
                             />
                             <Input
-                                label="Фамилия"
+                                label={window.pageContent['field_surname'][this.state.currentLanguage]}
                                 name="userLastName"
                                 maxLength={30}
                                 value={userLastName.value}
@@ -141,7 +143,7 @@ class SuperAdminEditEmployee extends Component {
                                 validationMessageText={userLastName.validationMessage[0]}
                             />
                             <Input
-                                label="Отчество"
+                                label={window.pageContent['field_patronymic'][this.state.currentLanguage]}
                                 name="userPatronymic"
                                 maxLength={30}
                                 value={userPatronymic.value}
@@ -163,7 +165,7 @@ class SuperAdminEditEmployee extends Component {
                                 validationMessageText={userEmail.validationMessage[0]}
                             />
                             <Input
-                                label="Телефон"
+                                label={window.pageContent['field_phone'][this.state.currentLanguage]}
                                 name="userPhone"
                                 maxLength={20}
                                 value={userPhone.value}
@@ -182,29 +184,32 @@ class SuperAdminEditEmployee extends Component {
                                         }} type="checkbox"/>
                                         <i></i>
                                         <span>
-										Дать права на работу с данными сотрудников
+										{window.pageContent['field_give_admin_role'][this.state.currentLanguage]}
 									</span>
                                     </label>
                                 </div>
                             </div>
 
-                            <ModalWindow textTitle="Сотрудник успешно изменен" value="ОК"
-                                         showModal={this.state.successModal}
-                                         onClose={(e) => {
-                                             this.redirectToEmployeesList()
-                                         }}
+                            <ModalWindow
+                                textTitle={window.pageContent['modal_success_edit'][this.state.currentLanguage]}
+                                value="ОК"
+                                showModal={this.state.successModal}
+                                onClose={(e) => {
+                                    this.redirectToEmployeesList()
+                                }}
                             />
 
                             <div className="form__submit">
                                 <input onClick={e => {
                                     e.preventDefault();
                                     this.submit()
-                                }} type="button" className="button" value="Сохранить"/>
+                                }} className="button" type="button"
+                                       value={window.pageContent['save_button'][this.state.currentLanguage]}/>
                                 <div className="back">
-                                    <a href="#" onClick={event => {
-                                        event.preventDefault()
+                                    <a href="" onClick={event => {
+                                        event.preventDefault();
                                         this.props.handleChange(0)
-                                    }}>Вернуться</a>
+                                    }}>{window.pageContent['back_button'][this.state.currentLanguage]}</a>
                                 </div>
                             </div>
                         </form>
@@ -213,6 +218,7 @@ class SuperAdminEditEmployee extends Component {
                     <Loader showLoader={this.state.showLoader}/>
 
                     <SuperAdminChangePassword
+                        currentLanguage={this.state.currentLanguage}
                         id={this.props.editingEmployee.id}
                         redirectBack={this.redirectToEmployeesList}
                     />

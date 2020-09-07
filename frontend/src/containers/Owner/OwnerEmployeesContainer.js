@@ -5,6 +5,7 @@ import EditEmployee from "../../components/Employees/EditEmployee";
 import SuperAdminAddEmployee from "../../components/Employees/SuperAdminAddEmployee";
 import AdminEmployeeList from "../../components/Employees/AdminEmployeeList";
 import SuperAdminEditEmployee from "../../components/Employees/SuperAdminEditEmployee";
+import logoutFromSuperAdmin from "../../components/Account/LogoutFromContext";
 
 
 class OwnerEmployeesContainer extends Component {
@@ -22,10 +23,13 @@ class OwnerEmployeesContainer extends Component {
         }
 
         this.setState({containerIndex: index})
-    }
+    };
 
     render() {
         let isSuperAdmin = window.isSuperAdmin;
+        if (localStorage.getItem('context_id')) {
+            logoutFromSuperAdmin();
+        }
 
         if (this.state.containerIndex === 1) {
             if (isSuperAdmin) {

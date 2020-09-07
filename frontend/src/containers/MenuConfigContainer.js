@@ -21,6 +21,14 @@ class MenuConfigContainer extends Component {
                     <Route exact={true} path='/owner/profile' component={MainMenu}/>
                     <Route exact={true} path='/owner/dictionaries' component={MainMenu}/>
                     <Route exact={true} path='/owner/employees' component={MainMenu}/>
+                    <Route exact={true} path='/owner/clients' component={MainMenu}/>
+                    <Route exact={true} path='/owner/receivers' component={MainMenu}/>
+                    <Route exact={true} path='/owner/accesses' component={MainMenu}/>
+                    <Route exact={true} path='/owner/payments' component={MainMenu}/>
+                    <Route exact={true} path='/owner/collections' component={MainMenu}/>
+                    <Route exact={true} path='/owner/storages' component={MainMenu}/>
+                    <Route exact={true} path='/owner/stowage' component={MainMenu}/>
+                    <Route exact={true} path='/owner/tariffs' component={MainMenu}/>
 
                     <Route exact={true} path='/administrator' component={AdminMenu}/>
                     <Route exact={true} path='/administrator/profile' component={AdminMenu}/>

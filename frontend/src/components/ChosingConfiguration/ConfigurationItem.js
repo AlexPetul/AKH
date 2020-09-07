@@ -11,7 +11,7 @@ class ConfigurationItem extends Component {
             <React.Fragment>
                 <div className="selectCard">
                     <div className="selectCard__wrapImg">
-                        <img src={'../../../static/img/original_images/' + this.props.icon}
+                        <img src={'/media/original_images/' + this.props.icon}
                              alt={this.props.icon}/>
                     </div>
                     <div className="selectCard__body">
@@ -20,7 +20,7 @@ class ConfigurationItem extends Component {
                         <button onClick={e => {
                             e.preventDefault();
                             this.props.chooseConfig(this.props.config.id)
-                        }} className="selectCard__btn">{window.buttonChooseText}
+                        }} className="selectCard__btn">{window.pageContent['button_choose_text'][this.props.currentLanguage]}
                         </button>
                     </div>
                 </div>

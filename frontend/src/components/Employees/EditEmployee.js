@@ -6,31 +6,34 @@ import ModalWindow from "../ModalWindow";
 import EmployeeChangePassword from "./EmployeeChangePassword";
 import Loader from "../../controls/Loader";
 import {OWNER_EMPLOYEES, ADMIN_EMPLOYEES} from "../../ContantUrls";
+import Title from "../../controls/Title";
 
 
 class EditEmployee extends Component {
     constructor(props) {
         super(props);
+        let currentLanguage = localStorage.getItem('lang_id') ? localStorage.getItem('lang_id') : 1;
         this.state = {
+            currentLanguage: currentLanguage,
             deleteModal: false,
             successModal: false,
             showLoader: false,
             employeeRoles: [],
-            userName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста имя")],
+            userName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_name_error'][currentLanguage])],
                 true, this.props.editingEmployee.firstName),
 
-            userLastName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста фамилию")],
+            userLastName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_surname_error'][currentLanguage])],
                 true, this.props.editingEmployee.lastName),
 
             userPatronymic: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста отчество")],
                 true, this.props.editingEmployee.surName),
 
-            userEmail: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста email адрес"),
-                new Rule(TypeOfRule.REGEX, "Введите пожалуйста email", /^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i),
+            userEmail: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_email_error'][currentLanguage]),
+                new Rule(TypeOfRule.REGEX, window.pageContent['invalid_email_error'][currentLanguage], /^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i),
             ], true, this.props.editingEmployee.email),
 
-            userPhone: new ValidationInput([new Rule(TypeOfRule.REGEX, "Введите пожалуйста телефон", /^([\s]*)$|^(\s*)?(\+)?([- _():=+]?\d[- _():=+]?){10,14}(\s*)?$/)],
-                true, this.props.editingEmployee.phone),
+            userPhone: new ValidationInput([new Rule(TypeOfRule.REGEX, window.pageContent['invalid_phone_error'][currentLanguage],
+                /^([\s]*)$|^(\s*)?(\+)?([- _():=+]?\d[- _():=+]?){10,14}(\s*)?$/)], true, this.props.editingEmployee.phone),
 
             userIdentity: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста идентификатор")],
                 true, this.props.editingEmployee.identity),
@@ -140,9 +143,9 @@ class EditEmployee extends Component {
                 <div className="container">
                     <div className="form">
                         <form>
-                            <div className="caption">Редактировать сотрудника</div>
+                            <Title titleText={window.pageContent['edit_employee_header'][this.state.currentLanguage]} titleStyles='caption'/>
                             <Input
-                                label="Имя"
+                                label={window.pageContent['field_name'][this.state.currentLanguage]}
                                 name="userName"
                                 maxLength={30}
                                 value={userName.value}
@@ -153,7 +156,7 @@ class EditEmployee extends Component {
                                 validationMessageText={userName.validationMessage[0]}
                             />
                             <Input
-                                label="Фамилия"
+                                label={window.pageContent['field_surname'][this.state.currentLanguage]}
                                 name="userLastName"
                                 maxLength={30}
                                 value={userLastName.value}
@@ -164,7 +167,7 @@ class EditEmployee extends Component {
                                 validationMessageText={userLastName.validationMessage[0]}
                             />
                             <Input
-                                label="Отчество"
+                                label={window.pageContent['field_patronymic'][this.state.currentLanguage]}
                                 name="userPatronymic"
                                 maxLength={30}
                                 value={userPatronymic.value}
@@ -186,7 +189,7 @@ class EditEmployee extends Component {
                                 validationMessageText={userEmail.validationMessage[0]}
                             />
                             <Input
-                                label="Телефон"
+                                label={window.pageContent['field_phone'][this.state.currentLanguage]}
                                 name="userPhone"
                                 maxLength={20}
                                 value={userPhone.value}
@@ -197,7 +200,7 @@ class EditEmployee extends Component {
                                 validationMessageText={userPhone.validationMessage[0]}
                             />
                             <Input
-                                label="Идентификатор"
+                                label={window.pageContent['field_identity'][this.state.currentLanguage]}
                                 name="userIdentity"
                                 maxLength={50}
                                 value={userIdentity.value}
@@ -208,7 +211,7 @@ class EditEmployee extends Component {
                                 validationMessageText={userIdentity.validationMessage[0]}
                             />
                             <Input
-                                label="Логин"
+                                label={window.pageContent['field_login'][this.state.currentLanguage]}
                                 name="userLogin"
                                 maxLength={30}
                                 value={userLogin.value}
@@ -218,36 +221,35 @@ class EditEmployee extends Component {
                                 validationMessageLength={userLogin.validationMessage.length}
                                 validationMessageText={userLogin.validationMessage[0]}
                             />
-                            <form>
-                                <div className="form__input">
-                                    <div className="label-input">
-                                        Выбрать роль
-                                    </div>
-                                    {Array.from(Array(this.state.rolesCount)).map((tr, tr_i) =>
-                                        <div className="select select_role" id={"select-role-" + tr_i}>
-                                            <select onChange={this.changeRole}
-                                                    name={"select-role-" + tr_i}
-                                                    value={this.state.userRole["select-role-" + tr_i]}>
-                                                {this.state.employeeRoles.map((role, index) =>
-                                                    <option value={role.id} key={index}>{role.name}</option>
-                                                )}
-                                            </select>
-                                            {tr_i
-                                                ?
-                                                <a
-                                                    name={"select-role-" + tr_i}
-                                                    onClick={this.removeRole}
-                                                    className="delete-role">Удалить роль
-                                                </a>
-                                                :
-                                                null
-                                            }
-                                        </div>
-                                    )}
+                            <div className="form__input">
+                                <div className="label-input">
+                                    {window.pageContent['field_choose_role'][this.state.currentLanguage]}
                                 </div>
-                            </form>
+                                {Array.from(Array(this.state.rolesCount)).map((tr, tr_i) =>
+                                    <div key={tr_i} className="select select_role" id={"select-role-" + tr_i}>
+                                        <select onChange={this.changeRole}
+                                                name={"select-role-" + tr_i}
+                                                value={this.state.userRole["select-role-" + tr_i]}>
+                                            {this.state.employeeRoles.map((role, index) =>
+                                                <option value={role.id} key={index}>{role.name}</option>
+                                            )}
+                                        </select>
+                                        {tr_i
+                                            ?
+                                            <a
+                                                name={"select-role-" + tr_i}
+                                                onClick={this.removeRole}
+                                                className="delete-role">{window.pageContent['delete_role'][this.state.currentLanguage]}
+                                            </a>
+                                            :
+                                            null
+                                        }
+                                    </div>
+                                )}
+                            </div>
 
-                            <ModalWindow textTitle="Сотрудник успешно изменен." value="ОК"
+                            <ModalWindow textTitle="Сотрудник успешно изменен."
+                                         value="ОК"
                                          showModal={this.state.successModal}
                                          onClose={(e) => {
                                              this.redirectToEmployeesList()
@@ -257,18 +259,18 @@ class EditEmployee extends Component {
                                 e.preventDefault();
                                 this.addRole()
                             }}>
-                            Добавить еще роль
+                                {window.pageContent['add_role'][this.state.currentLanguage]}
                             </span>
                             <div className="form__submit">
                                 <input onClick={e => {
                                     e.preventDefault();
                                     this.submit()
-                                }} type="button" className="button" value="Сохранить"/>
+                                }} type="button" className="button" value={window.languageId === 1 ? "Сохранить" : "Save"}/>
                                 <div className="back">
                                     <a href="#" onClick={event => {
-                                        event.preventDefault()
+                                        event.preventDefault();
                                         this.props.handleChange(0)
-                                    }}>Вернуться</a>
+                                    }}>{window.languageId === 1 ? "Вернуться" : "Back"}</a>
                                 </div>
                             </div>
                         </form>

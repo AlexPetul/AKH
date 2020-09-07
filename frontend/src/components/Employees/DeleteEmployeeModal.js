@@ -13,7 +13,7 @@ class DeleteEmployeeModal extends Component {
                 <div className="modal__container">
                     <div className="modal__block">
                         <div className="modal__caption">
-                            <div className="modal__title">Вы точно хотите удалить сотрудника?</div>
+                            <div className="modal__title">{window.pageContent['modal_delete'][this.props.currentLanguage]}</div>
                         </div>
                         <div className="modal__info">
                             <div className="modal__name">
@@ -22,12 +22,12 @@ class DeleteEmployeeModal extends Component {
                         </div>
                         <div className="form">
                             <div className="form__submit">
-                                <input type="button" onClick={this.props.confirmDelete} className="button" value="Удалить"/>
+                                <input type="button" onClick={this.props.confirmDelete} className="button" value={window.pageContent['confirm_delete'][this.props.currentLanguage]}/>
                                 <div className="cansel">
                                     <a href="" onClick={e => {
                                         e.preventDefault();
                                         this.props.rejectDelete()
-                                    }}>Отменить</a>
+                                    }}>{window.pageContent['reject_delete'][this.props.currentLanguage]}</a>
                                 </div>
                             </div>
                         </div>

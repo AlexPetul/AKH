@@ -5,43 +5,45 @@ import API from "../../services/api";
 import ModalWindow from "../ModalWindow";
 import {OWNER_EMPLOYEES} from "../../ContantUrls";
 import Loader from "../../controls/Loader";
+import Title from "../../controls/Title";
 
 
 class AddEmployee extends Component {
     constructor() {
         super()
+        let currentLanguage = localStorage.getItem('lang_id') ? localStorage.getItem('lang_id') : 1;
         this.state = {
             deleteModal: false,
+            currentLanguage: currentLanguage,
             showModal: false,
             successModal: false,
             showLoader: false,
             errorModal: false,
             errorText: "",
             employeesRoles: [],
-            userName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста имя")],
+            userName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_name_error'][currentLanguage])],
                 true),
 
-            userLastName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста фамилию")],
+            userLastName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_surname_error'][currentLanguage])],
                 true),
 
-            userPatronymic: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста отчество")],
-                true),
+            userPatronymic: new ValidationInput([], true),
 
-            userEmail: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста email адрес"),
-                new Rule(TypeOfRule.REGEX, "Введите пожалуйста email", /^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i),
+            userEmail: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_email_error'][currentLanguage]),
+                new Rule(TypeOfRule.REGEX, window.invalidEmailError, /^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i),
             ], true),
 
-            userPhone: new ValidationInput([new Rule(TypeOfRule.REGEX, "Введите пожалуйста телефон", /^([\s]*)$|^(\s*)?(\+)?([- _():=+]?\d[- _():=+]?){10,14}(\s*)?$/)],
+            userPhone: new ValidationInput([new Rule(TypeOfRule.REGEX, window.pageContent['invalid_phone_error'][currentLanguage],
+                /^([\s]*)$|^(\s*)?(\+)?([- _():=+]?\d[- _():=+]?){10,14}(\s*)?$/)], true),
+
+            userIdentity: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_identity_error'][currentLanguage])],
                 true),
 
-            userIdentity: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста идентификатор")],
+            userLogin: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_login_error'][currentLanguage])],
                 true),
 
-            userLogin: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста логин")],
-                true),
-
-            userPassword: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста пароль"),
-                new Rule(TypeOfRule.LENGTH5, "Пароль должен содержать более 5 символов"),
+            userPassword: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_password_error'][currentLanguage]),
+                new Rule(TypeOfRule.LENGTH5, window.pageContent['invalid_password_len_error'][currentLanguage]),
             ]),
 
             userRole: {"select-role-0": 201},
@@ -88,16 +90,17 @@ class AddEmployee extends Component {
                 this.setState({showLoader: true}, () => {
                     API.post('updateTerminalUser', data)
                         .then(response => {
+                            console.log(response);
                             let responseCode = response.data.errorCode;
                             if (responseCode === 16) {
                                 this.setState({
-                                    errorText: "Пользователь с указанным логином уже существует.",
+                                    errorText: window.pageContent['modal_login_exists'][this.state.currentLanguage],
                                     errorModal: true,
                                     showLoader: false
                                 })
                             } else if (responseCode === 17) {
                                 this.setState({
-                                    errorText: "Пользователь с указанным идентификатором уже существует.",
+                                    errorText: window.pageContent['modal_identity_exists'][this.state.currentLanguage],
                                     errorModal: true,
                                     showLoader: false
                                 })
@@ -115,7 +118,7 @@ class AddEmployee extends Component {
 
     changeRole = event => {
         let dictRoles = this.state.userRole
-        dictRoles[event.target.name] = parseInt(event.target.value, 10)
+        dictRoles[event.target.name] = parseInt(event.target.value, 10);
         this.setState({userRole: dictRoles})
     }
 
@@ -152,9 +155,9 @@ class AddEmployee extends Component {
                 <div className="container">
                     <div className="form">
                         <form>
-                            <div className="caption">Добавить сотрудника</div>
+                            <Title titleText={window.pageContent['add_employee_header'][this.state.currentLanguage]} titleStyles='caption'/>
                             <Input
-                                label="Имя"
+                                label={window.pageContent['field_name'][this.state.currentLanguage]}
                                 name="userName"
                                 maxLength={30}
                                 value={userName.value}
@@ -165,7 +168,7 @@ class AddEmployee extends Component {
                                 validationMessageText={userName.validationMessage[0]}
                             />
                             <Input
-                                label="Фамилия"
+                                label={window.pageContent['field_surname'][this.state.currentLanguage]}
                                 name="userLastName"
                                 maxLength={30}
                                 value={userLastName.value}
@@ -176,7 +179,7 @@ class AddEmployee extends Component {
                                 validationMessageText={userLastName.validationMessage[0]}
                             />
                             <Input
-                                label="Отчество"
+                                label={window.pageContent['field_patronymic'][this.state.currentLanguage]}
                                 name="userPatronymic"
                                 maxLength={30}
                                 value={userPatronymic.value}
@@ -198,7 +201,7 @@ class AddEmployee extends Component {
                                 validationMessageText={userEmail.validationMessage[0]}
                             />
                             <Input
-                                label="Телефон"
+                                label={window.pageContent['field_phone'][this.state.currentLanguage]}
                                 name="userPhone"
                                 maxLength={20}
                                 value={userPhone.value}
@@ -209,7 +212,7 @@ class AddEmployee extends Component {
                                 validationMessageText={userPhone.validationMessage[0]}
                             />
                             <Input
-                                label="Идентификатор"
+                                label={window.pageContent['field_identity'][this.state.currentLanguage]}
                                 name="userIdentity"
                                 maxLength={30}
                                 value={userIdentity.value}
@@ -220,7 +223,7 @@ class AddEmployee extends Component {
                                 validationMessageText={userIdentity.validationMessage[0]}
                             />
                             <Input
-                                label="Логин"
+                                label={window.pageContent['field_login'][this.state.currentLanguage]}
                                 name="userLogin"
                                 maxLength={30}
                                 value={userLogin.value}
@@ -231,7 +234,7 @@ class AddEmployee extends Component {
                                 validationMessageText={userLogin.validationMessage[0]}
                             />
                             <Input
-                                label="Пароль"
+                                label={window.pageContent['field_password'][this.state.currentLanguage]}
                                 name="userPassword"
                                 maxLength={100}
                                 value={userPassword.value}
@@ -242,70 +245,74 @@ class AddEmployee extends Component {
                                 validationMessageLength={userPassword.validationMessage.length}
                                 validationMessageText={userPassword.validationMessage[0]}
                             />
-                            <form>
-                                <div className="form__input">
-                                    <div className="label-input">
-                                        Выбрать роль
-                                    </div>
-                                    {Array.from(Array(this.state.rolesCount)).map((tr, tr_i) =>
-                                        <div className="select select_role" id={"select-role-" + tr_i}>
-                                            <select onChange={this.changeRole} name={"select-role-" + tr_i}
-                                                    value={this.state.userRole["select-role-" + tr_i]}>
-                                                {this.state.employeesRoles.map((role, index) =>
-                                                    <option value={role.id} key={index}>{role.name}</option>
-                                                )}
-                                            </select>
-                                            {tr_i
-                                                ?
-                                                <a
-                                                    name={"select-role-" + tr_i}
-                                                    onClick={this.removeRole}
-                                                    className="delete-role">Удалить роль
-                                                </a>
-                                                :
-                                                null
-                                            }
-                                        </div>
-                                    )}
+                            <div className="form__input">
+                                <div className="label-input">
+                                    {window.pageContent['field_choose_role'][this.state.currentLanguage]}
                                 </div>
-                            </form>
+                                {Array.from(Array(this.state.rolesCount)).map((tr, tr_i) =>
+                                    <div key={tr_i} className="select select_role" id={"select-role-" + tr_i}>
+                                        <select onChange={this.changeRole} name={"select-role-" + tr_i}
+                                                value={this.state.userRole["select-role-" + tr_i]}>
+                                            {this.state.employeesRoles.map((role, index) =>
+                                                <option value={role.id} key={index}>{role.name}</option>
+                                            )}
+                                        </select>
+                                        {tr_i
+                                            ?
+                                            <a
+                                                name={"select-role-" + tr_i}
+                                                onClick={this.removeRole}
+                                                className="delete-role">{window.pageContent['delete_role'][this.state.currentLanguage]}
+                                            </a>
+                                            :
+                                            null
+                                        }
+                                    </div>
+                                )}
+                            </div>
                             <span className="add-role" onClick={e => {
                                 e.preventDefault();
                                 this.addRole()
                             }}>
-                            Добавить еще роль
+                                {window.pageContent['add_role'][this.state.currentLanguage]}
                             </span>
                             <div className="form__submit">
                                 <input onClick={e => {
                                     e.preventDefault();
                                     this.submit()
-                                }} type="button" className="button" value="Сохранить"/>
+                                }} type="button" className="button"
+                                       value={window.languageId === 1 ? "Сохранить" : "Save"}/>
                                 <div className="back">
                                     <a href="" onClick={event => {
                                         event.preventDefault();
                                         this.props.handleChange(0)
-                                    }}>Вернуться</a>
+                                    }}>{window.languageId === 1 ? "Вернуться" : "Back"}</a>
                                 </div>
                             </div>
 
                             <Loader showLoader={this.state.showLoader}/>
 
-                            <ModalWindow textTitle={this.state.errorText}
-                                         value="Ok"
-                                         showModal={this.state.errorModal}
-                                         onClose={(e) => this.setState({errorModal: false})}
+                            <ModalWindow
+                                textTitle={this.state.errorText}
+                                value="Ok"
+                                showModal={this.state.errorModal}
+                                onClose={(e) => this.setState({errorModal: false})}
                             />
 
-                            <ModalWindow textTitle="Вы не можете добавить две одинаковые роли." value="Ok"
-                                         showModal={this.state.showModal}
-                                         onClose={(e) => this.setState({showModal: false})}
+                            <ModalWindow
+                                textTitle={window.pageContent['modal_role_duplicate'][this.state.currentLanguage]}
+                                value="Ok"
+                                showModal={this.state.showModal}
+                                onClose={(e) => this.setState({showModal: false})}
                             />
 
-                            <ModalWindow textTitle="Сотрудник успешно добавлен!" value="Ok"
-                                         showModal={this.state.successModal}
-                                         onClose={(e) => {
-                                             window.location = OWNER_EMPLOYEES;
-                                         }}
+                            <ModalWindow
+                                textTitle={window.pageContent['modal_success_add'][this.state.currentLanguage]}
+                                value="Ok"
+                                showModal={this.state.successModal}
+                                onClose={(e) => {
+                                    window.location = OWNER_EMPLOYEES;
+                                }}
                             />
 
                         </form>

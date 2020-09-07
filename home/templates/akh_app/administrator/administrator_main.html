@@ -11,24 +11,15 @@
         var menus = {{ menus|safe }};
         var apiPath = "{{ api_path }}";
         var languageId = {{ language_id }};
-        var authMenus = {{ auth_menus|safe }};
-        var page_header = "{{ page.page_header }}";
         var portal_token = "{{ portal_token }}";
-
+        var pageContent = {{ page_content|safe }};
         var totalTerminalsGroupsIcon = "{{ page.total_terminals_groups_icon }}";
-        var totalTerminalsGroupsText = "{{ page.total_terminals_groups_text }}";
         var totalTerminalsIcon = "{{ page.total_terminals_icon }}";
-        var totalTerminalsText = "{{ page.total_terminals_text }}";
         var onlineTerminalsIcon = "{{ page.online_terminals_icon }}";
-        var onlineTerminalsText = "{{ page.online_terminals_text }}";
         var expiredTerminalsIcon = "{{ page.expired_terminals_icon }}";
-        var expiredTerminalsText = "{{ page.expired_terminals_text }}";
         var pendingTerminalsIcon = "{{ page.pending_terminals_icon }}";
-        var pendingTerminalsText = "{{ page.pending_terminals_text }}";
 
         var messageTypes = {{ message_types|safe}};
     </script>
-
-    <script src="{% static 'js/main.js' %}"></script>
 
 {% endblock content %}

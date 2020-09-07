@@ -4,7 +4,6 @@ import Button from "../../controls/Button";
 import {ValidationInput, ValidateState, Rule, TypeOfRule} from "../../helpers/ValidationHelper";
 import API from "../../services/api";
 import Link from "../../controls/Link";
-import {LOGIN_PATH} from "../../ContantUrls";
 import ModalWindow from "../ModalWindow";
 
 class Restore extends Component {
@@ -12,11 +11,14 @@ class Restore extends Component {
 
     constructor() {
         super();
+        let currentLanguage = localStorage.getItem('lang_id') ? localStorage.getItem('lang_id') : 1;
         this.state = {
             errorModal: false,
+            currentLanguage: currentLanguage,
+            successModal: false,
             portalToken: window.portal_token,
-            userEmail: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста email адрес"),
-                new Rule(TypeOfRule.REGEX, "Введите пожалуйста email", /^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i),
+            userEmail: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_email_error'][currentLanguage]),
+                new Rule(TypeOfRule.REGEX, window.pageContent['invalid_email_error'][currentLanguage], /^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i),
             ])
         };
     }
@@ -40,11 +42,11 @@ class Restore extends Component {
                 headers: {'Token': this.state.portalToken}
             })
                 .then(result => {
+                    console.log(result);
                     let users = result.data.data.list;
                     let currentUser = users.filter((x) => {
                         return x.email === userMail
                     });
-                    console.log(currentUser);
                     if (currentUser.length !== 0) {
                         fetch('/send-reset-mail/', {
                             method: 'POST',
@@ -53,14 +55,12 @@ class Restore extends Component {
                         })
                             .then(result => {
                                 console.log(result.json());
-                                this.props.changeEmailSent(true);
+                                this.setState({successModal: true});
                             })
                     } else {
                         this.setState({errorModal: true});
                     }
                 });
-        } else {
-            this.props.changeEmailSent(false);
         }
     };
 
@@ -85,17 +85,28 @@ class Restore extends Component {
                         validationMessageText={userEmail.validationMessage[0]}
                     />
                     <div className="form__submit">
-                        <Button handleClick={this.submit} type="submit" value="Восстановить"/>
-                        <Link className="back" path="/login/" text="Вернуться"/>
+                        <Button handleClick={this.submit} type="submit"
+                                value={window.pageContent['restore_button_text'][this.state.currentLanguage]}/>
+                        <Link className="back" path="/login/"
+                              text={window.pageContent['back_to_login'][this.state.currentLanguage]}/>
                     </div>
                 </form>
 
                 <ModalWindow
                     value="Ok"
-                    textTitle="Пользователь с таким почтовым ящиком не найден."
+                    textTitle={window.pageContent['modal_user_notfound'][this.state.currentLanguage]}
                     showModal={this.state.errorModal}
                     onClose={(e) => {
                         this.setState({errorModal: false});
+                    }}
+                />
+
+                <ModalWindow
+                    value="Ok"
+                    textTitle={window.pageContent['modal_success'][this.state.currentLanguage]}
+                    showModal={this.state.successModal}
+                    onClose={(e) => {
+                        this.setState({successModal: false});
                     }}
                 />
 

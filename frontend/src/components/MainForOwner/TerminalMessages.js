@@ -7,8 +7,10 @@ import Loader from "../../controls/Loader";
 class TerminalMessages extends Component {
     constructor() {
         super()
+        let currentLanguage = localStorage.getItem('lang_id') ? localStorage.getItem('lang_id') : 1;
         this.state = {
             terminals: [],
+            currentLanguage: currentLanguage,
             filterIds: [],
             messagesTypes: [],
             warningState: true,
@@ -62,7 +64,6 @@ class TerminalMessages extends Component {
                 } else {
                     arr.push(parseInt(messageTypes[index].id, 10))
                 }
-                console.log(arr)
                 this.setState({filterIds: arr})
             }
         }
@@ -78,9 +79,9 @@ class TerminalMessages extends Component {
         return (
             <div className="main main-4-col terminals">
                 <div className="listTerminals">
-                    <span className="listTerminals__text">{window.displayText}:</span>
+                    <span className="listTerminals__text">{window.pageContent['display_text'][this.state.currentLanguage]}:</span>
                     {this.state.messagesTypes.map((mesType, index) =>
-                        <div className="form__input" style={{'margin-top': '0px'}}>
+                        <div className="form__input" style={{'marginTop': '0px'}} key={index}>
                             <div className="check check_nowrap">
                                 <label>
                                     <input value={mesType.name} onChange={e => {
@@ -104,8 +105,9 @@ class TerminalMessages extends Component {
                                 terminal.messages.map((message, ind) =>
                                     this.state.filterIds.includes(message.messageTypeId) ?
                                         <TerminalMessage
+                                            displayNumber={true}
                                             message={message}
-                                            index={ind}
+                                            key={terminal.id + message.messageTypeId}
                                             terminal={terminal}
                                         />
                                         : null

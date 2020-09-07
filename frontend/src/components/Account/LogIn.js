@@ -15,17 +15,19 @@ class LogIn extends Component {
 
     constructor() {
         super()
+        let currentLanguage = localStorage.getItem('lang_id') ? localStorage.getItem('lang_id') : 1;
         this.state = {
             showLoader: false,
             showModal: false,
+            currentLanguage: currentLanguage,
             currentUser: null,
             resetMailModal: false,
             errorModal: false,
             userInactiveModal: false,
-            userEmail: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста email адрес"),
-                new Rule(TypeOfRule.REGEX, "Введите пожалуйста email", /^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i),
+            userEmail: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_email'][currentLanguage]),
+                new Rule(TypeOfRule.REGEX, window.pageContent['invalid_email'][currentLanguage], /^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i),
             ]),
-            userPassword: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста пароль")])
+            userPassword: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_password'][currentLanguage])])
         };
     }
 
@@ -37,9 +39,11 @@ class LogIn extends Component {
         });
     };
 
-    submit = () => {
+    submit = (event) => {
+        event.preventDefault();
+
         let validationResult = ValidateState(this.state);
-        this.setState({...validationResult.state})
+        this.setState({...validationResult.state});
         if (validationResult.isValid) {
             this.setState({showLoader: true}, () => {
 
@@ -118,10 +122,13 @@ class LogIn extends Component {
     };
 
     sendAgainMail = () => {
-        fetch('/send-reset-mail/', {
+        fetch('/save-inactive-user/', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({user: [this.state.currentUser]})
+            body: JSON.stringify({
+                newUserId: this.state.currentUser.id,
+                email: this.state.currentUser.email
+            })
         })
             .then(result => {
                 console.log(result.json());
@@ -140,11 +147,11 @@ class LogIn extends Component {
                 <div className="content">
                     <div className="container">
                         <div className="signin">
-                            <Title titleText={window.pageHeader} titleStyles='title'/>
+                            <Title titleText={window.pageContent['page_header'][this.state.currentLanguage]} titleStyles='title'/>
                             <div className="form form_mini">
-                                <form>
+                                <form onSubmit={this.submit}>
                                     <Input
-                                        label="Email"
+                                        label={window.pageContent['email_field'][this.state.currentLanguage]}
                                         name="userEmail"
                                         maxLength={50}
                                         value={userEmail.value}
@@ -155,7 +162,7 @@ class LogIn extends Component {
                                         validationMessageText={userEmail.validationMessage[0]}
                                     />
                                     <Input
-                                        label="Пароль"
+                                        label={window.pageContent['password_field'][this.state.currentLanguage]}
                                         name="userPassword"
                                         maxLength={100}
                                         value={userPassword.value}
@@ -166,8 +173,9 @@ class LogIn extends Component {
                                         validationMessageLength={userPassword.validationMessage.length}
                                         validationMessageText={userPassword.validationMessage[0]}
                                     />
-                                    <Link path={FORGOT_PASSWORD_PATH} className="form__link" text="Забыли пароль?"/>
-                                    <Button handleClick={this.submit} value="Войти"/>
+                                    <Link path={FORGOT_PASSWORD_PATH} className="form__link"
+                                          text={window.pageContent['forgot_password'][this.state.currentLanguage]}/>
+                                    <Button type="submit" handleClick={this.submit} value={window.pageContent['sign_in'][this.state.currentLanguage]}/>
                                 </form>
                             </div>
                         </div>
@@ -177,25 +185,29 @@ class LogIn extends Component {
 
                 <ModalWindow
                     value="Ok"
-                    textTitle="Пользователь заблокирован."
+                    textTitle={window.pageContent['modal_user_blocked'][this.state.currentLanguage]}
                     showModal={this.state.errorModal}
                     onClose={(e) => this.setState({errorModal: false})}
                 />
 
-                <ModalWindow value="Ok" textTitle="Пользователя с таким паролем и email не существует"
-                             showModal={this.state.showModal} onClose={(e) => this.setState({showModal: false})}/>
+                <ModalWindow
+                    value="Ok"
+                    textTitle={window.pageContent['modal_user_not_exists'][this.state.currentLanguage]}
+                    showModal={this.state.showModal} onClose={(e) => this.setState({showModal: false})}
+                />
 
                 <ModalWindow
                     value="Ok"
-                    textTitle="Пожалуйста, подтвердите свой почтовый ящик."
+                    textTitle={window.pageContent['modal_confirm_email'][this.state.currentLanguage]}
                     showModal={this.state.userInactiveModal}
+                    langId={this.state.currentLanguage}
                     sendAgainMail={this.sendAgainMail}
                     onClose={(e) => this.setState({userInactiveModal: false})}
                 />
 
                 <ModalWindow
                     value="Ok"
-                    textTitle="Письмо для подтверждения отправлено на указанный email."
+                    textTitle={window.pageContent['modal_mail_sent'][this.state.currentLanguage]}
                     showModal={this.state.resetMailModal}
                     onClose={(e) => this.setState({resetMailModal: false})}
                 />

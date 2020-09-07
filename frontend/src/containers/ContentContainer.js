@@ -13,13 +13,26 @@ import MyProfileContainer from "./MyProfileContainer";
 import OwnerEmployeesContainer from "./Owner/OwnerEmployeesContainer";
 import TerminalGroupsContainer from "./Admin/TerminalGroupsContainer";
 import AdminTerminalsContainer from "./Admin/AdminTerminalsContainer";
+import PaymentsContainer from "./Owner/PaymentsContainer";
+import CollectionsContainer from "./Owner/CollectionsContainer";
+import StoragesContainer from "./Owner/StoragesContainer";
+import ClientsContainer from "./Owner/ClientsContainer";
+import OwnerAccessesContainer from "./Owner/OwnerAccessesContainer";
+import TariffsContainer from "./Owner/TariffsContainer";
 
 
 class ContentContainer extends Component {
 
     componentDidMount() {
-        let currentUrl = window.location.pathname
-        let currLink = document.querySelectorAll("a[href='" + currentUrl + "']");
+        let currentUrl = window.location.pathname;
+        let currLinkRaw = document.querySelectorAll("a[href='" + currentUrl + "']");
+        let currLink = [];
+        for (let index = 0; index < currLinkRaw.length; index++) {
+            if (currLinkRaw[index].classList.contains('nav-link')) {
+                currLink.push(currLinkRaw[index]);
+            }
+        }
+
         try {
             if (currLink[0].classList[0] !== "link-logo") {
                 if (currLink.length !== 0) {
@@ -27,7 +40,10 @@ class ContentContainer extends Component {
                     [].forEach.call(elements, function (el) {
                         el.classList.remove("active");
                     });
-                    currLink[0].classList.add('active')
+                    currLink[0].classList.add('active');
+                    let index = currLink[0].getAttribute('index');
+                    document.getElementById('ic_id__' + index).style.display = 'none';
+                    document.getElementById('ic_hover_id__' + index).style.display = 'inline-block';
                 }
             }
         } catch (e) {
@@ -44,6 +60,14 @@ class ContentContainer extends Component {
                 <Route exact={true} path='/owner/profile' component={MyProfileContainer}/>
                 <Route exact={true} path='/owner/dictionaries' component={DictionaryContainer}/>
                 <Route exact={true} path='/owner/employees' component={OwnerEmployeesContainer}/>
+                <Route exact={true} path='/owner/clients' component={ClientsContainer}/>
+                <Route exact={true} path='/owner/receivers' component={ClientsContainer}/>
+                <Route exact={true} path='/owner/payments' component={PaymentsContainer}/>
+                <Route exact={true} path='/owner/accesses' component={OwnerAccessesContainer}/>
+                <Route exact={true} path='/owner/collections' component={CollectionsContainer}/>
+                <Route exact={true} path='/owner/storages' component={StoragesContainer}/>
+                <Route exact={true} path='/owner/stowage' component={StoragesContainer}/>
+                <Route exact={true} path='/owner/tariffs' component={TariffsContainer}/>
 
 
                 <Route exact={true} path='/administrator' component={MainAdminContainer}/>

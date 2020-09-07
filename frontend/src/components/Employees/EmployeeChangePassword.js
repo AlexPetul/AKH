@@ -16,11 +16,13 @@ class EmployeeChangePassword extends Component {
         super(props);
         this.state = {
             successModal: false,
-            userPassword: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста пароль"),
-                new Rule(TypeOfRule.LENGTH5, "Пароль должен содержать более 5 символов"),
+            userPassword: new ValidationInput([new Rule(TypeOfRule.REQUIRED,
+                window.languageId === 1 ? "Введите пожалуйста пароль" : "Please input password"),
+                new Rule(TypeOfRule.LENGTH5, window.languageId === 1 ? "Пароль должен содержать более 5 символов" : "Password must contain 6 or more symbols"),
             ]),
-            userPasswordRepeat: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста пароль"),
-                new Rule(TypeOfRule.LENGTH5, "Пароль должен содержать более 5 символов"),
+            userPasswordRepeat: new ValidationInput([new Rule(TypeOfRule.REQUIRED,
+                window.languageId === 1 ? "Введите пожалуйста пароль" : "Please input password"),
+                new Rule(TypeOfRule.LENGTH5, window.languageId === 1 ? "Пароль должен содержать более 5 символов" : "Password must contain 6 or more symbols"),
             ]),
         }
     }
@@ -65,11 +67,11 @@ class EmployeeChangePassword extends Component {
 
         return (
             <React.Fragment>
-                <Title titleText="Сменить пароль" titleStyles={this.props.titleStyles}/>
+                <Title titleText={window.languageId === 1 ? "Сменить пароль" : "Change password"} titleStyles={this.props.titleStyles}/>
                 <div className="form form_mini">
                     <form>
                         <Input
-                            label="Введите новый пароль"
+                            label={window.languageId === 1 ? "Новый пароль" : "New password"}
                             name="userPassword"
                             maxLength={100}
                             value={userPassword.value}
@@ -81,7 +83,7 @@ class EmployeeChangePassword extends Component {
                             validationMessageText={userPassword.validationMessage[0]}
                         />
                         <Input
-                            label="Повторите новый пароль"
+                            label={window.languageId === 1 ? "Повторите новый пароль" : "Repeat new password"}
                             name="userPasswordRepeat"
                             maxLength={100}
                             value={userPasswordRepeat.value}
@@ -92,12 +94,12 @@ class EmployeeChangePassword extends Component {
                             validationMessageLength={userPasswordRepeat.validationMessage.length}
                             validationMessageText={userPasswordRepeat.validationMessage[0]}
                         />
-                        <Button handleClick={this.submit} value="Сменить пароль"/>
+                        <Button handleClick={this.submit} value={window.languageId === 1 ? "Сменить" : "Change"}/>
                     </form>
                 </div>
 
                 <ModalWindow
-                    textTitle="Вы успешно изменили пароль"
+                    textTitle={window.languageId === 1 ? "Вы успешно изменили пароль!" : "Password successfully changed!"}
                     value="Ok"
                     showModal={this.state.successModal}
                     onClose={(e) => {

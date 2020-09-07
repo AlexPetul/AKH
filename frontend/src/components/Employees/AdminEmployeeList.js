@@ -6,12 +6,15 @@ import ButtonIcon from "../../controls/ButtonIcon";
 import Loader from "../../controls/Loader";
 import ChangeUsersStatusModal from "./ChangeUsersStatusModal";
 import {ADMIN_EMPLOYEES} from "../../ContantUrls";
+import Title from "../../controls/Title";
 
 
 class AdminEmployeeList extends Component {
     constructor() {
         super()
+        let currentLanguage = localStorage.getItem('lang_id') ? localStorage.getItem('lang_id') : 1;
         this.state = {
+            currentLanguage: currentLanguage,
             showLoader: false,
             employeesList: [],
             userStatuses: [],
@@ -31,7 +34,7 @@ class AdminEmployeeList extends Component {
         this.setState({
             itemsPerPage: window.employeesPerPage,
             rightBound: window.employeesPerPage
-        })
+        });
 
         this.setState({showLoader: true}, () => {
             API.get('getUsers')
@@ -68,14 +71,14 @@ class AdminEmployeeList extends Component {
                 el.classList.remove("active-page");
             });
         }
-    }
+    };
 
     updateBounds = (newRightBound, newLeftBound) => {
         this.setState({
             rightBound: newRightBound,
             leftBound: newLeftBound
         })
-    }
+    };
 
     deleteEmployee(employeeId) {
         const currentEmployee = this.state.employeesList.filter(user => user.id === employeeId);
@@ -87,14 +90,14 @@ class AdminEmployeeList extends Component {
 
     rejectDelete = () => {
         this.setState({deleteModal: false})
-    }
+    };
 
     rejectChangeStatus = () => {
         this.setState({changeStatusModal: false})
-    }
+    };
 
     confirmDeleteEmployee = event => {
-        let employeeId = this.state.deletingEmployee.id
+        let employeeId = this.state.deletingEmployee.id;
 
         API.post('setUserStatus', {
             sourceId: employeeId,
@@ -102,14 +105,13 @@ class AdminEmployeeList extends Component {
             statusComment: ""
         })
             .then(response => {
-                let selectControl = document.getElementsByClassName("employee-row-" + employeeId);
-                selectControl[0].outerHTML = "";
                 this.setState({
                     deleteModal: false,
                     deletingEmployee: null
-                })
+                });
+                window.location = ADMIN_EMPLOYEES;
             })
-    }
+    };
 
     changeUsersStatus = (event, user) => {
         this.setState({
@@ -117,7 +119,7 @@ class AdminEmployeeList extends Component {
             changeStatusModal: true,
             nextStatus: event.target.classList.contains("active") ? 101 : 102
         })
-    }
+    };
 
     confirmChangeStatus = () => {
         API.post('setUserStatus', {
@@ -128,103 +130,101 @@ class AdminEmployeeList extends Component {
             .then(response => {
                 window.location = ADMIN_EMPLOYEES;
             })
-    }
+    };
 
     render() {
         const employeeListSliced = this.state.employeesList.slice(
             this.state.leftBound, this.state.rightBound
-        )
+        );
 
         return (
             <div className="content">
                 <div className="container">
                     <div className="top">
                         <div className="top__left">
-                            <div className="caption">
-                                Сотрудники
-                            </div>
-                            <div className="description">
-                                Управление сотрудниками
-                            </div>
+                            <Title titleText={window.pageContent['page_header'][this.state.currentLanguage]} titleStyles='caption'/>
+                            <Title titleText={window.pageContent['page_subheader'][this.state.currentLanguage]} titleStyles='description'/>
                         </div>
                         {localStorage.getItem('role_id') === '103' ? null :
                             <div className="top__right">
                                 <a href="#" onClick={e => {
                                     e.preventDefault();
                                     this.props.handleChange(1)
-                                }} className="button">Добавить</a>
+                                }} className="button">{window.pageContent['add_button_name'][this.state.currentLanguage]}</a>
                             </div>}
                     </div>
                     <div className="table-wrap">
                         <table>
-                            <tr>
-                                <th>Фамилия</th>
-                                <th>Имя</th>
-                                <th>Отчество</th>
-                                <th>Email</th>
-                                <th>Телефон</th>
-                                <th>Статус</th>
-                                <th></th>
-                            </tr>
-                            {employeeListSliced.map((employee, index) =>
-                                employee.id !== Number(localStorage.getItem('user_id'))
-                                    ?
-                                    <tr key={index} className={"employee-row-" + employee.id}>
-                                        <td>
-                                            <b>{employee.lastName}</b>
-                                        </td>
-                                        <td>
-                                            <b>{employee.firstName}</b>
-                                        </td>
-                                        <td>
-                                            <b>{employee.surName}</b>
-                                        </td>
-                                        <td>
-                                            {employee.email}
-                                        </td>
-                                        <td>
-                                            {employee.phone}
-                                        </td>
-                                        <td>
-                                            <div className="radio-wrap">
+                            <tbody>
+                                <tr>
+                                    <th>{window.pageContent['table_surname'][this.state.currentLanguage]}</th>
+                                    <th>{window.pageContent['table_name'][this.state.currentLanguage]}</th>
+                                    <th>{window.pageContent['table_patronymic'][this.state.currentLanguage]}</th>
+                                    <th>Email</th>
+                                    <th>{window.pageContent['table_phone'][this.state.currentLanguage]}</th>
+                                    <th>{window.pageContent['table_status'][this.state.currentLanguage]}</th>
+                                    <th></th>
+                                </tr>
+                                {employeeListSliced.map((employee, index) =>
+                                    employee.id !== Number(localStorage.getItem('user_id'))
+                                        ?
+                                        <tr key={index} className={"employee-row-" + employee.id}>
+                                            <td>
+                                                <b>{employee.lastName}</b>
+                                            </td>
+                                            <td>
+                                                <b>{employee.firstName}</b>
+                                            </td>
+                                            <td>
+                                                <b>{employee.surName}</b>
+                                            </td>
+                                            <td>
+                                                {employee.email}
+                                            </td>
+                                            <td>
+                                                {employee.phone}
+                                            </td>
+                                            <td>
+                                                <div className="radio-wrap">
+                                                    {localStorage.getItem('role_id') === '103' ? null :
+                                                    <div
+                                                        className={employee.statusId === 101 ? 'radio' : 'radio active'}
+                                                        onClick={e => {
+                                                            this.changeUsersStatus(e, employee)
+                                                        }}
+                                                    />}
+                                                    {this.state.userStatuses.map((status) =>
+                                                        status.id === employee.statusId ? status.name : null
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td>
                                                 {localStorage.getItem('role_id') === '103' ? null :
-                                                <div
-                                                    className={employee.statusId === 101 ? 'radio' : 'radio active'}
-                                                    onClick={e => {
-                                                        this.changeUsersStatus(e, employee)
-                                                    }}
-                                                />}
-                                                {this.state.userStatuses.map((status) =>
-                                                    status.id === employee.statusId ? status.name : null
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            {localStorage.getItem('role_id') === '103' ? null :
-                                            <div className="buttons">
-                                                <ButtonIcon
-                                                    className="button-delete"
-                                                    handleClick={e => {
-                                                        e.preventDefault();
-                                                        this.deleteEmployee(employee.id)
-                                                    }}
-                                                    title="Удалить сотрудника"
-                                                />
-                                                <ButtonIcon
-                                                    className="button-edit"
-                                                    handleClick={e => {
-                                                        e.preventDefault();
-                                                        this.props.handleChange(2, employee)
-                                                    }}
-                                                    id={employee.id}
-                                                    title="Редактировать сотрудника"
-                                                />
-                                            </div>}
-                                        </td>
-                                    </tr>
-                                    :
-                                    null
-                            )}
+                                                <div className="buttons">
+                                                    <ButtonIcon
+                                                        className="button-delete"
+                                                        handleClick={e => {
+                                                            e.preventDefault();
+                                                            this.deleteEmployee(employee.id)
+                                                        }}
+                                                        title="Удалить сотрудника"
+                                                    />
+                                                    <ButtonIcon
+                                                        className="button-edit"
+                                                        handleClick={e => {
+                                                            e.preventDefault();
+                                                            this.props.handleChange(2, employee)
+                                                        }}
+                                                        id={employee.id}
+                                                        title="Редактировать сотрудника"
+                                                    />
+                                                </div>}
+                                            </td>
+                                        </tr>
+                                        :
+                                        null
+                                )}
+                            </tbody>
                         </table>
                     </div>
 
@@ -248,6 +248,7 @@ class AdminEmployeeList extends Component {
                 {this.state.deleteModal
                     ?
                     <DeleteEmployeeModal
+                        currentLanguage={this.state.currentLanguage}
                         confirmDelete={this.confirmDeleteEmployee}
                         rejectDelete={this.rejectDelete}
                         user={this.state.deletingEmployee}/>
@@ -259,6 +260,7 @@ class AdminEmployeeList extends Component {
                     ?
                     <ChangeUsersStatusModal
                         user={this.state.changingStatusUser}
+                        currentLanguage={this.state.currentLanguage}
                         rejectChanging={this.rejectChangeStatus}
                         nextStatus={this.state.nextStatus}
                         confirmChangeStatus={this.confirmChangeStatus}

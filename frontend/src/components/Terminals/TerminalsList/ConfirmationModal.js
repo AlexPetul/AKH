@@ -28,12 +28,12 @@ class ConfirmationModal extends Component {
                             <input type="submit" onClick={e => {
                                 e.preventDefault();
                                 this.props.confirmRequest(this.props.newStatus)
-                            }} className="button" value="Да"/>
+                            }} className="button" value={window.languageId === 1 ? "Да" : "Yes"}/>
                             <div className="cansel">
                                 <a href="" type="button" onClick={e => {
                                     e.preventDefault();
                                     this.props.rejectRequest()
-                                }}>Нет</a>
+                                }}>{window.languageId === 1 ? "Нет" : "No"}</a>
                             </div>
                         </div>
                     </div>

@@ -4,10 +4,13 @@
 {% block body_class %}template-homepage{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/index.css' %}"/>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?version=13"/>
 {% endblock extra_css %}
 
 {% block content %}
 
 {% endblock content %}
+
+{% block extra_js %}
+    <script src="{% static 'js/main.js' %}?version=16"></script>
+{% endblock extra_js %}

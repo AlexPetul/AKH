@@ -11,11 +11,9 @@
         var menus = {{ menus|safe }};
         var apiPath = "{{ api_path }}";
         var languageId = {{ language_id }};
+        var pageContent = {{ page_content|safe }};
         var apiLinks = {{ api_links|safe }};
-        var pageHeader = "{{ page.page_header }}";
         var portal_token = "{{ portal_token }}"
     </script>
-
-    <script src="{% static 'js/main.js' %}"></script>
 
 {% endblock content %}

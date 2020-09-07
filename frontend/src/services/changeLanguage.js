@@ -9,6 +9,7 @@ export default function changeLanguage(event) {
     })
         .then(response => response.json())
         .then(responseJson => {
+            localStorage.setItem('lang_id', selectedLang);
             window.location = window.location;
         })
 };

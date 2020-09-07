@@ -1,6 +1,5 @@
 import React, {Component} from "react";
 import Title from "../../controls/Title";
-import SuccessfulRestore from "../../components/Account/SuccessfulRestore";
 import Restore from "../../components/Account/Restore";
 
 
@@ -10,31 +9,18 @@ class RestorePasswordContainer extends Component {
     constructor() {
         super();
         this.state = {
-            emailSent: false
+            currentLanguage: localStorage.getItem('lang_id') ? localStorage.getItem('lang_id') : 1
         };
     }
 
-    changeEmailSent = (emailSent) => {
-        this.setState({emailSent: emailSent})
-    }
-
     render() {
-        const {changeEmailSent} = this
         return (
             <div className="content">
                 <div className="container">
                     <div className="signin">
-
-                        {this.state.emailSent
-                            ?
-                            <SuccessfulRestore/>
-                            :
-                            <React.Fragment>
-                                <Title titleText={window.pageHeader} titleStyles='title'/>
-                                <Restore changeEmailSent={changeEmailSent} />
-                            </React.Fragment>
-                        }
-
+                        <Title titleText={window.pageContent['page_header'][this.state.currentLanguage]}
+                               titleStyles='title'/>
+                        <Restore/>
                     </div>
                 </div>
             </div>

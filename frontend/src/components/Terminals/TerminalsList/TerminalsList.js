@@ -2,8 +2,7 @@ import React, {Component} from 'react'
 import API from "../../../services/api";
 import Loader from "../../../controls/Loader";
 import EmployeePagination from "../../Employees/EmployeePagination";
-import Moment from 'moment'
-import ButtonIcon from "../../../controls/ButtonIcon";
+import TerminalTableRow from "./TerminalTableRow";
 
 
 class OwnerTerminalsList extends Component {
@@ -25,7 +24,7 @@ class OwnerTerminalsList extends Component {
         this.setState({
             itemsPerPage: window.terminalsPerPage,
             rightBound: window.terminalsPerPage
-        })
+        });
 
         this.setState({showLoader: true}, () => {
             API.get('getTerminals')
@@ -45,7 +44,7 @@ class OwnerTerminalsList extends Component {
                                 terminalStatuses: statuses,
                                 showLoader: false,
                                 countPages: countPages
-                            })
+                            });
 
                             this.props.setListHandler(terminalsList)
                         })
@@ -60,14 +59,14 @@ class OwnerTerminalsList extends Component {
                 el.classList.remove("active-page");
             });
         }
-    }
+    };
 
     updateBounds = (newRightBound, newLeftBound) => {
         this.setState({
             rightBound: newRightBound,
             leftBound: newLeftBound
         })
-    }
+    };
 
     updateTerminalsList(list) {
         this.setState({
@@ -88,75 +87,30 @@ class OwnerTerminalsList extends Component {
         return (
             <div className="table-wrap owner-terminals">
                 <table>
+                    <tbody>
                     <tr>
-                        <th>{window.tableNumber}</th>
-                        <th>{window.tableAddress}</th>
-                        <th>{window.tableToken}</th>
-                        <th>{window.tableTokenExpires}</th>
-                        <th>{window.tableStatus}</th>
-                        <th>{window.tableDateTime}</th>
-                        <th>{window.tableCellsCount}</th>
+                        <th>{window.pageContent['table_number'][this.props.currentLanguage]}</th>
+                        <th>{window.pageContent['table_address'][this.props.currentLanguage]}</th>
+                        <th>{window.pageContent['table_key'][this.props.currentLanguage]}</th>
+                        <th>{window.pageContent['table_key_expires'][this.props.currentLanguage]}</th>
+                        <th>{window.pageContent['table_status'][this.props.currentLanguage]}</th>
+                        <th>{window.pageContent['table_datetime'][this.props.currentLanguage]}</th>
+                        <th>{window.pageContent['table_cells_count'][this.props.currentLanguage]}</th>
                         <th></th>
                         <th></th>
                     </tr>
 
                     {terminalsListSliced.map((terminal, index) =>
-                        <tr key={index}>
-                            <td>№{terminal.number}</td>
-                            <td>
-                                {terminal.address}
-                                <div className="label">
-                                </div>
-                            </td>
-                            <td>
-                                {terminal.token}
-                            </td>
-                            {terminal.expires
-                                ?
-                                <td>
-                                    {Moment(terminal.expires).format('DD.MM.YYYY hh:mm:ss')}
-                                </td>
-                                :
-                                <td></td>
-                            }
-                            <td>
-                                {this.state.terminalStatuses.map((status) =>
-                                    status.id === terminal.statusId ?
-                                        <span className="status" style={{'color': this.state.statusColors[terminal.statusId]}}>{status.name}</span> : null
-                                )}
-                            </td>
-                            {terminal.statusDateTime ?
-                                <td>
-                                    {Moment(terminal.statusDateTime).format('DD.MM.YYYY hh:mm:ss')}
-                                </td>
-                                :
-                                <td></td>
-                            }
-                            <td>
-                                <b>Всего {terminal.cellsCount}:</b>
-                                <ul className="listBlocks">
-                                    <il className="listBlock__item listBlock__item-current">Свободна
-                                        - {terminal.cells[0].count}</il>
-                                    <il className="listBlock__item listBlock__item-worning ">Занята
-                                        - {terminal.cells[1].count}</il>
-                                    <il className="listBlock__item listBlock__item-success">Резерв
-                                        - {terminal.cells[2].count}</il>
-                                    <il className="listBlock__item listBlock__item-error">Блокировка
-                                        - {terminal.cells[3].count}</il>
-                                </ul>
-                            </td>
-                            <td>
-                                <ButtonIcon
-                                    title="Информация о терминале"
-                                    className="button-gear"
-                                    handleClick={e => {
-                                        e.preventDefault();
-                                        this.props.terminalDetailedHandler(true, terminal)
-                                    }}
-                                />
-                            </td>
-                        </tr>
+                        <TerminalTableRow
+                            currentLanguage={this.props.currentLanguage}
+                            key={index}
+                            terminal={terminal}
+                            statuses={this.state.terminalStatuses}
+                            colors={this.state.statusColors}
+                            getTerminalInfo={this.props.terminalDetailedHandler}
+                        />
                     )}
+                    </tbody>
                 </table>
 
                 <Loader showLoader={this.state.showLoader}/>

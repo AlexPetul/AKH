@@ -4,22 +4,23 @@ import {ValidationInput, ValidateState, Rule, TypeOfRule} from "../../helpers/Va
 import API from "../../services/api";
 import ModalWindow from "../ModalWindow";
 import Loader from "../../controls/Loader";
+import Title from "../../controls/Title";
 
 
 class SuperAdminChangePassword extends Component {
     inputStyle = "input input_weight";
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             showLoader: false,
             showModal: false,
             portalToken: window.portal_token,
-            userPassword: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста пароль"),
-                new Rule(TypeOfRule.LENGTH5, "Пароль должен содержать более 5 символов"),
+            userPassword: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_password_error'][this.props.currentLanguage]),
+                new Rule(TypeOfRule.LENGTH5, window.pageContent['invalid_password_len_error'][this.props.currentLanguage]),
             ]),
-            userPasswordRepeat: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Повторите пожалуйста пароль"),
-                new Rule(TypeOfRule.REPEAT, "Пароли не совпадают", () => this.state.userPassword.value)
+            userPasswordRepeat: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_password_repeat_error'][this.props.currentLanguage]),
+                new Rule(TypeOfRule.REPEAT, window.pageContent['invalid_password_repeat_error'][this.props.currentLanguage], () => this.state.userPassword.value)
             ])
         };
     }
@@ -61,12 +62,10 @@ class SuperAdminChangePassword extends Component {
         return (
             <React.Fragment>
                 <div className="form">
-                    <div className="caption">
-                        Сменить пароль
-                    </div>
+                    <Title titleText={window.pageContent['change_password_header'][this.props.currentLanguage]} titleStyles='caption'/>
                     <form>
                         <Input
-                            label="Введите новый пароль"
+                            label={window.pageContent['field_password'][this.props.currentLanguage]}
                             name="userPassword"
                             maxLength={100}
                             value={userPassword.value}
@@ -78,7 +77,7 @@ class SuperAdminChangePassword extends Component {
                             validationMessageText={userPassword.validationMessage[0]}
                         />
                         <Input
-                            label="Повторите новый пароль"
+                            label={window.pageContent['field_repeat_password'][this.props.currentLanguage]}
                             name="userPasswordRepeat"
                             maxLength={100}
                             value={userPasswordRepeat.value}
@@ -91,19 +90,22 @@ class SuperAdminChangePassword extends Component {
                         />
                         <div className="form__submit">
                             <input type="submit" onClick={e => {
-                                e.preventDefault()
+                                e.preventDefault();
                                 this.submit()
-                            }} className="button" value="Изменить"/>
+                            }} className="button" value={window.pageContent['change_button'][this.props.currentLanguage]}
+                            />
                         </div>
                     </form>
 
                     <Loader showLoader={this.state.showLoader}/>
 
-                    <ModalWindow textTitle="Пароль успешно изменен" value="ОК"
-                                 showModal={this.state.showModal}
-                                 onClose={(e) => {
-                                     this.props.redirectBack()
-                                 }}
+                    <ModalWindow
+                        textTitle={window.pageContent['modal_password_changed'][this.props.currentLanguage]}
+                        value="ОК"
+                        showModal={this.state.showModal}
+                        onClose={(e) => {
+                            this.props.redirectBack()
+                        }}
                     />
 
                 </div>

@@ -2,12 +2,18 @@ import React, {Component} from 'react'
 import API from "../../services/api";
 import AdminTerminalsFilter from "../../components/AdminTerminals/AdminTerminalsFilter";
 import AdminTerminalsList from "../../components/AdminTerminals/AdminTerminalsList";
+import logoutFromSuperAdmin from "../../components/Account/LogoutFromContext";
 
 
 class AdminTerminalsContainer extends Component {
     constructor() {
         super()
+        if (localStorage.getItem('context_id')) {
+            logoutFromSuperAdmin();
+        }
+        let currentLanguage = localStorage.getItem('lang_id') ? localStorage.getItem('lang_id') : 1;
         this.state = {
+            currentLanguage: currentLanguage,
             terminalGroupsList: [],
             allGroups: [],
             allowedTerminalStatuses: []
@@ -63,16 +69,17 @@ class AdminTerminalsContainer extends Component {
                     <div className="top">
                         <div className="top__left">
                             <div className="caption">
-                                Терминалы
+                                {window.pageContent['page_header'][this.state.currentLanguage]}
                             </div>
                             <div className="description">
-                                Список всех терминалов
+                                {window.pageContent['page_subheader'][this.state.currentLanguage]}
                             </div>
                         </div>
                     </div>
 
                     <div className="top-group-btns">
                         <AdminTerminalsFilter
+                            currentLanguage={this.state.currentLanguage}
                             groupsHandler={this.getTerminalGroups}
                             groups={this.state.terminalGroupsList}
                             allGroups={this.state.allGroups}
@@ -80,14 +87,14 @@ class AdminTerminalsContainer extends Component {
                         <form>
                             <div className="form__input">
                                 <div className="label-input">
-                                    Фильтр
+                                    {window.languageId === 1 ? "Фильтр" : "Filter"}
                                 </div>
                                 <div className="select">
                                     <select className="status-filter" onChange={this.filterTerminalsByStatus}>
                                         {this.state.allowedTerminalStatuses.map((status, index) =>
                                             (index === 0
                                                     ?
-                                                    <option id="all" key="all">Все</option>
+                                                    <option id="all" key="all">{window.languageId === 1 ? "Все" : "All"}</option>
                                                     :
                                                     ((status.id !== 301) && (status.id !== 305))
                                                         ?
@@ -103,6 +110,7 @@ class AdminTerminalsContainer extends Component {
                     </div>
 
                     <AdminTerminalsList
+                        currentLanguage={this.state.currentLanguage}
                         ref={instance => {
                             this.child = instance;
                         }}

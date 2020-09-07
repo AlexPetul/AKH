@@ -26,8 +26,10 @@ export const TypeOfRule = {
     REQUIRED: "REQUIRED",
     REGEX: "REGEX",
     LENGTH5: "LENGTH5",
-    REPEAT: "REPEAT"
-}
+    DATETIME: "DATETIME",
+    REPEAT: "REPEAT",
+    INTERVAL: "INTERVAL"
+};
 
 //Функция берёт state из компонента (например=> userEmail: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста email адрес")]),)
 export function ValidateState(state) {
@@ -68,7 +70,6 @@ export function ValidateRule(rule, value) {
             case  TypeOfRule.REQUIRED: //Если тип проверки REQUIRED
                 if (value || value === 0) {            //Если value - true
                     rule.isValid = true;
-                    console.log(rule.type);
                     return true;  //Возвращаем в ValidateInput
                 } else {
                     rule.isValid = false;
@@ -90,6 +91,19 @@ export function ValidateRule(rule, value) {
                     console.log("you need more symbols");
                     return false;
                 }
+            case TypeOfRule.INTERVAL:
+                let intervalTypeControl = document.getElementById('interval__type');
+                let intervalType = intervalTypeControl.options[intervalTypeControl.selectedIndex].value;
+                if (intervalType === "min") {
+                    if ((value >= 60) || (value <= 0)) {
+                        return false;
+                    }
+                } else if (intervalType === "hours") {
+                    if ((value >= 24) || (value <= 0)) {
+                        return false;
+                    }
+                }
+                return true;
             case TypeOfRule.REPEAT: //Тип проверки на количество символов
                 const confirmValue = rule.parameter();
                 if (value == confirmValue) {
@@ -98,6 +112,8 @@ export function ValidateRule(rule, value) {
                     console.log("passwords don't match " + confirmValue);
                     return false;
                 }
+            case TypeOfRule.DATETIME:
+                return value.match(rule.parameter);
             default:
                 console.log("Unexpected type of rule: " + rule.type);
         }

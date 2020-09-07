@@ -8,8 +8,10 @@ import {ValidateState} from "../../helpers/ValidationHelper";
 class DictionaryContainer extends Component {
     constructor() {
         super()
+        let currentLanguage = localStorage.getItem('lang_id') ? localStorage.getItem('lang_id') : 1;
         this.state = {
             containerIndex: 0,
+            currentLanguage: currentLanguage,
             currentPosition: {}
         };
 
@@ -26,15 +28,22 @@ class DictionaryContainer extends Component {
     render() {
         if (this.state.containerIndex === 0) {
             return (
-                <DictionaryList handler={this.handler}/>
+                <DictionaryList
+                    currentLanguage={this.state.currentLanguage}
+                    handler={this.handler}/>
             )
         } else if (this.state.containerIndex === 1) {
             return (
-                <AddDictionary handler={this.handler}/>
+                <AddDictionary
+                    currentLanguage={this.state.currentLanguage}
+                    handler={this.handler}/>
             )
         } else if (this.state.containerIndex === 2) {
             return (
-                <UpdatePosition currentPosition={this.state.currentPosition} handler={this.handler}/>
+                <UpdatePosition
+                    currentLanguage={this.state.currentLanguage}
+                    currentPosition={this.state.currentPosition}
+                    handler={this.handler}/>
             )
         }
     }

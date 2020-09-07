@@ -7,13 +7,12 @@ class TerminalGroupModal extends Component {
     inputStyle = "input input_weight";
 
     constructor(props) {
-        super(props)
+        super(props);
         this.state = {
-            groupName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста наименование")],
+            groupName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['modal_field_error'][this.props.currentLanguage])],
                 true, this.props.group.name),
 
-            groupDescription: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста описание")],
-                true, this.props.group.description),
+            groupDescription: new ValidationInput([], true, this.props.group.description),
         }
     }
 
@@ -45,13 +44,13 @@ class TerminalGroupModal extends Component {
                     <div className="modal__container">
                         <div className="modal__block">
                             <div className="modal__caption">
-                                <div className="modal__title">Править данные группы</div>
+                                <div className="modal__title">{window.pageContent['modal_header'][this.props.currentLanguage]}</div>
                                 <div
                                     className="modal__sub-title">{this.props.owner.lastName} {this.props.owner.firstName} {this.props.owner.surName}</div>
                             </div>
                             <div className="form">
                                 <Input
-                                    label="Наименование"
+                                    label={window.pageContent['modal_field_name'][this.props.currentLanguage]}
                                     name="groupName"
                                     maxLength={30}
                                     value={this.state.groupName.value}
@@ -62,7 +61,7 @@ class TerminalGroupModal extends Component {
                                     validationMessageText={groupName.validationMessage[0]}
                                 />
                                 <Input
-                                    label="Описание"
+                                    label={window.pageContent['modal_field_description'][this.props.currentLanguage]}
                                     maxLength={150}
                                     name="groupDescription"
                                     value={this.state.groupDescription.value}
@@ -74,15 +73,15 @@ class TerminalGroupModal extends Component {
                                 />
                                 <div className="form__submit">
                                     <input type="submit" onClick={e => {
-                                        e.preventDefault()
+                                        e.preventDefault();
                                         this.sendConfirmEditing()
                                     }} className="button"
-                                           value="Сохранить"/>
+                                           value={window.pageContent['modal_button_save'][this.props.currentLanguage]}/>
                                     <div className="cansel">
                                         <a href="" onClick={e => {
-                                            e.preventDefault()
+                                            e.preventDefault();
                                             this.props.rejectEditing()
-                                        }}>Отменить</a>
+                                        }}>{window.pageContent['modal_button_cancel'][this.props.currentLanguage]}</a>
                                     </div>
                                 </div>
                             </div>

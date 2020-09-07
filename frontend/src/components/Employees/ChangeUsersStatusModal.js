@@ -13,7 +13,14 @@ class ChangeUsersStatusModal extends Component {
                 <div className="modal__container">
                     <div className="modal__block">
                         <div className="modal__caption">
-                            <div className="modal__title">Вы точно хотите {this.props.nextStatus === 102 ? "заблокировать" :  "разблокировать"} сотрудника?</div>
+                            {this.props.nextStatus === 102
+                                ?
+                                <div
+                                    className="modal__title">{window.pageContent['modal_block'][this.props.currentLanguage]}</div>
+                                :
+                                <div
+                                    className="modal__title">{window.pageContent['modal_unblock'][this.props.currentLanguage]}</div>
+                            }
                         </div>
                         <div className="modal__info">
                             <div className="modal__name">
@@ -22,12 +29,13 @@ class ChangeUsersStatusModal extends Component {
                         </div>
                         <div className="form">
                             <div className="form__submit">
-                                <input type="button" onClick={this.props.confirmChangeStatus} className="button" value="Да"/>
+                                <input type="button" onClick={this.props.confirmChangeStatus} className="button"
+                                       value={window.pageContent['confirm_delete'][this.props.currentLanguage]}/>
                                 <div className="cansel">
                                     <a href="" onClick={e => {
                                         e.preventDefault();
                                         this.props.rejectChanging()
-                                    }}>Отменить</a>
+                                    }}>{window.pageContent['reject_delete'][this.props.currentLanguage]}</a>
                                 </div>
                             </div>
                         </div>

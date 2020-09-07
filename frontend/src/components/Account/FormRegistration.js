@@ -14,21 +14,23 @@ class FormRegistration extends Component {
 
     constructor() {
         super();
+        let currentLanguage = localStorage.getItem('lang_id') ? localStorage.getItem('lang_id') : 1;
         this.state = {
             showLoader: false,
+            currentLanguage: currentLanguage,
             showModal: false,
             successModal: false,
             portalToken: window.portal_token,
-            userEmail: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста email адрес"),
-                new Rule(TypeOfRule.REGEX, "Введите пожалуйста email", /^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i),
+            userEmail: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_email_error'][currentLanguage]),
+                new Rule(TypeOfRule.REGEX, window.pageContent['invalid_email_error'][currentLanguage], /^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i),
             ]),
-            userName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста имя")]),
-            userSurname: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста фамилию")]),
-            userPassword: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Введите пожалуйста пароль"),
-                new Rule(TypeOfRule.LENGTH5, "Пароль должен содержать более 5 символов"),
+            userName: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_name_error'][currentLanguage])]),
+            userSurname: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_surname_error'][currentLanguage])]),
+            userPassword: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_password_error'][currentLanguage]),
+                new Rule(TypeOfRule.LENGTH5, window.pageContent['invalid_password_len_error'][currentLanguage]),
             ]),
-            userPasswordRepeat: new ValidationInput([new Rule(TypeOfRule.REQUIRED, "Повторите пожалуйста пароль"),
-                new Rule(TypeOfRule.REPEAT, "Пароли не совпадают", () => this.state.userPassword.value)
+            userPasswordRepeat: new ValidationInput([new Rule(TypeOfRule.REQUIRED, window.pageContent['invalid_reset_password_error'][currentLanguage]),
+                new Rule(TypeOfRule.REPEAT, window.pageContent['invalid_password_mismatch_error'][currentLanguage], () => this.state.userPassword.value)
             ])
         };
     }
@@ -64,7 +66,6 @@ class FormRegistration extends Component {
                             // update token
                         } else if (result.data.errorCode === 6) {
                             this.setState({showModal: true, showLoader: false});
-                            this.props.changeRegistrationStatus(false);
                         } else {
                             let newUserId = result.data.data.id;
                             fetch('/save-inactive-user/', {
@@ -92,7 +93,7 @@ class FormRegistration extends Component {
         const {userEmail, userName, userSurname, userPassword, userPasswordRepeat} = this.state;
         return (
             <React.Fragment>
-                <Title titleText='Регистрация пользователя' titleStyles='title'/>
+                <Title titleText={window.pageContent['page_header'][this.state.currentLanguage]} titleStyles='title'/>
                 <div className="form">
                     <form>
                         <Input
@@ -107,7 +108,7 @@ class FormRegistration extends Component {
                             validationMessageText={userEmail.validationMessage[0]}
                         />
                         <Input
-                            label="Имя"
+                            label={window.pageContent['field_name'][this.state.currentLanguage]}
                             maxLength={30}
                             name="userName"
                             value={userName.value}
@@ -118,7 +119,7 @@ class FormRegistration extends Component {
                             validationMessageText={userName.validationMessage[0]}
                         />
                         <Input
-                            label="Фамилия"
+                            label={window.pageContent['field_surname'][this.state.currentLanguage]}
                             name="userSurname"
                             maxLength={30}
                             value={userSurname.value}
@@ -129,7 +130,7 @@ class FormRegistration extends Component {
                             validationMessageText={userSurname.validationMessage[0]}
                         />
                         <Input
-                            label="Пароль"
+                            label={window.pageContent['field_password'][this.state.currentLanguage]}
                             name="userPassword"
                             maxLength={100}
                             value={userPassword.value}
@@ -141,7 +142,7 @@ class FormRegistration extends Component {
                             validationMessageText={userPassword.validationMessage[0]}
                         />
                         <Input
-                            label="Повторить пароль"
+                            label={window.pageContent['field_repeat_password'][this.state.currentLanguage]}
                             name="userPasswordRepeat"
                             maxLength={100}
                             value={userPasswordRepeat.value}
@@ -152,22 +153,30 @@ class FormRegistration extends Component {
                             validationMessageLength={userPasswordRepeat.validationMessage.length}
                             validationMessageText={userPasswordRepeat.validationMessage[0]}
                         />
-                        <Button handleClick={this.submit} value="Регистрация"/>
+                        <Button handleClick={this.submit}
+                                value={window.pageContent['sign_up_button'][this.state.currentLanguage]}/>
                     </form>
                 </div>
+
                 <Loader showLoader={this.state.showLoader}/>
 
-                <ModalWindow value="Ok" textTitle="Письмо для подтверждения регистрации отправлено на указанный email"
-                             showModal={this.state.successModal}
-                             onClose={(e) => {
-                                 this.setState({successModal: false});
-                                 this.props.changeRegistrationStatus(true);
-                                 window.location = LOGIN_PATH;
-                             }}/>
+                <ModalWindow
+                    value="Ok"
+                    textTitle={window.pageContent['modal_email_sent'][this.state.currentLanguage]}
+                    showModal={this.state.successModal}
+                    onClose={(e) => {
+                        this.setState({successModal: false});
+                        window.location = LOGIN_PATH;
+                    }}
+                />
 
-                <ModalWindow value="Ok" textTitle="Пользователь с таким email уже зарегистрирован"
-                             showModal={this.state.showModal}
-                             onClose={(e) => this.setState({showModal: false})}/>
+                <ModalWindow
+                    value="Ok"
+                    textTitle={window.pageContent['modal_user_exists'][this.state.currentLanguage]}
+                    showModal={this.state.showModal}
+                    onClose={(e) => this.setState({showModal: false})}
+                />
+
             </React.Fragment>
         );
     }
