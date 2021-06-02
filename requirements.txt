@@ -108,7 +108,7 @@ tinycss2==1.0.2
 tzlocal==2.1
 Unidecode==1.1.1
 uritemplate==3.0.1
-urllib3==1.25.9
+urllib3==1.26.5
 virtualenv==20.0.13
 wagtail==2.9
 WeasyPrint==51
